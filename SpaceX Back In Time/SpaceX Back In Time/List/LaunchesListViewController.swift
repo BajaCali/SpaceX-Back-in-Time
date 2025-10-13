@@ -13,26 +13,29 @@ class LaunchesViewController: UIViewController {
     }
 
     private func setupUI() {
+        setupViewUI()
+        attachDelegates()
+        registerCell()
+        attachTableView()
+    }
+
+    private func setupViewUI() {
         self.title = "Rocket Launches 🚀"
         self.toolbarItems = [ ]
     }
 
-        // Configure Table View
-        tableView.dataSource = self // Set the data source
-        tableView.delegate = self   // Set the delegate
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier) // Register a cell type
+    private func attachDelegates() {
+        tableView.dataSource = self
+        tableView.delegate = self
+    }
 
-        // Add table view to the view hierarchy
+    private func registerCell() {
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
+    }
+
+    private func attachTableView() {
         view.addSubview(tableView)
-
-        // Set up constraints for the table view to fill the screen
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-        ])
+        tableView.pin(to: view)
     }
 }
 
