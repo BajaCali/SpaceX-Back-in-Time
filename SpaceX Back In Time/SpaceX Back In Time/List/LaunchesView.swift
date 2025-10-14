@@ -7,6 +7,7 @@ struct LaunchesView: UIViewControllerRepresentable {
         let launchesVC = LaunchesViewController()
 
         let navigationController = UINavigationController(rootViewController: launchesVC)
+        navigationController.navigationBar.prefersLargeTitles = true
 
         return navigationController
     }
