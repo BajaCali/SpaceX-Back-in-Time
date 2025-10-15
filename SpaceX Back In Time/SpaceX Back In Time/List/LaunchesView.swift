@@ -16,3 +16,7 @@ struct LaunchesView: UIViewControllerRepresentable {
         // no updates needed
     }
 }
+
+#Preview {
+    LaunchesView()
+}

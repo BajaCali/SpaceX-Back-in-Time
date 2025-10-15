@@ -82,11 +82,10 @@ extension LaunchesViewController {
         viewModel
             .$launches
             .debounce(for: 0.1, scheduler: RunLoop.main)
-            .sink { [weak self] newLaunches in
-            print(newLaunches.count)
-            self?.tableView.reloadData()
-        }
-        .store(in: &cancellables)
+            .sink { [weak self] _ in
+                self?.tableView.reloadData()
+            }
+            .store(in: &cancellables)
     }
 }
 
