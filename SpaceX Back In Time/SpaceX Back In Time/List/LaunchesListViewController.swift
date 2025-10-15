@@ -4,6 +4,7 @@ import Combine
 
 class LaunchesViewController: UIViewController {
     private let tableView = UITableView()
+    private let backgroundView = UIView()
 
     private var viewModel = ViewModel()
 
@@ -20,6 +21,9 @@ extension LaunchesViewController {
         setupUI()
         bindViewModelUpdates()
     }
+
+    override func viewDidAppear(_ animated: Bool) {
+        viewModel.onAppear()
     }
 }
 
@@ -27,11 +31,21 @@ extension LaunchesViewController {
 
 extension LaunchesViewController {
     private func setupUI() {
+        setupBackground()
         attachDelegates()
         registerCell()
         attachTableView()
         setupNavigationBar()
     }
+
+    private func setupBackground() {
+        let swiftUIView = UIHostingController(rootView: BackgroundView(initialState: viewModel.state))
+
+        backgroundView.addSubview(swiftUIView.view)
+        backgroundView.layoutSubviews()
+
+        swiftUIView.view.pin(to: backgroundView)
+        tableView.backgroundView = backgroundView
     }
 
     private func setupNavigationBar() {
