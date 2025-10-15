@@ -75,17 +75,55 @@ extension LaunchesViewController {
     }
 }
 
-// MARK: - ViewModelBindings
+// MARK: - ViewModel Bindings
 
 extension LaunchesViewController {
     private func bindViewModelUpdates() {
-        viewModel
-            .$launches
+        viewModel.$launches
             .debounce(for: 0.1, scheduler: RunLoop.main)
             .sink { [weak self] _ in
                 self?.tableView.reloadData()
             }
             .store(in: &cancellables)
+
+        viewModel.$errorMessage
+            .compactMap(\.self)
+            .sink { [weak self] errorMessage in
+                self?.showErrorMessageAlert(errorMessage)
+            }
+            .store(in: &cancellables)
+    }
+}
+
+// MARK: - Alerts
+
+extension LaunchesViewController {
+    func showErrorMessageAlert(_ message: String) {
+        let confirmAction = UIAlertAction(
+            title: "Ok",
+            style: .cancel
+        ) { [weak self] _ in
+            self?.viewModel.errorOkButtonTapped()
+        }
+
+        let tryAgainAction = UIAlertAction(
+            title: "Try Again",
+            style: .default
+        ) { [weak self] _ in
+            self?.viewModel.errorTryAgainButtonTapped()
+        }
+
+        let alert = UIAlertController(
+            title: "Network Error",
+            message: message,
+            preferredStyle: .alert
+        )
+
+        alert.addAction(confirmAction)
+        alert.addAction(tryAgainAction)
+
+        self.present(alert, animated: true)
+
     }
 }
 

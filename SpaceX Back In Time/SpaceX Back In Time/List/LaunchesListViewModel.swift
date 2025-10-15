@@ -19,6 +19,7 @@ extension LaunchesViewController {
                 eventBroker.post(.list(.stateUpdated(state)))
             }
         }
+        @Published var errorMessage: String?
 
         init() {
             self.launches = .init()
@@ -54,6 +55,7 @@ extension LaunchesViewController.ViewModel {
 
 extension LaunchesViewController.ViewModel {
     func testButtonTapped() {
+        errorMessage = "An test error happend!"
         launches.append(Launch.mockLaunches.randomElement()!)
     }
 
@@ -64,5 +66,13 @@ extension LaunchesViewController.ViewModel {
     func onAppear() {
         state = .loading
         fetchAdditionalData()
+    }
+
+    func errorOkButtonTapped() {
+
+    }
+
+    func errorTryAgainButtonTapped() {
+
     }
 }
