@@ -57,6 +57,7 @@ extension SpaceXRouter: Endpoint {
                 "options": [
                     "limit": Self.pageLimit,
                     "page": page,
+                    "sort": ["flight_number": "descending"],
                     "select": ["name", "detail", "success", "date_unix", "flight_number"]
                 ]
             ]

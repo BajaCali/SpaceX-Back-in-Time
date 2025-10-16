@@ -23,7 +23,7 @@ extension Launch {
     static func from(raw rawLaunch: LaunchRaw) -> Launch {
         Launch(
             title: rawLaunch.name,
-            isFavourite: rawLaunch.success,
+            isFavourite: rawLaunch.success ?? true,
             date: Date(timeIntervalSince1970: TimeInterval(rawLaunch.date_unix)),
             flightNumber: rawLaunch.flight_number,
         )
