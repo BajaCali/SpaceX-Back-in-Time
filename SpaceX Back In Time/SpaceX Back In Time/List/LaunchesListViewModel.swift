@@ -38,16 +38,22 @@ extension LaunchesViewController.ViewModel {
             do {
                 let launches: LaunchesRaw = try await launchesFetcher.getLaunchesPage(0)
 //                let launches: LaunchesRaw = try await LaunchesFetcher.previewValue.getLaunchesPage(0)
-                self.dataFetched(launches: launches)
+                dataFetched(.success(launches))
             } catch {
-                print(error)
+                guard let apiError = error as? APIError else { return }
+                dataFetched(.failure(apiError))
             }
         }
     }
 
-    func dataFetched(launches: LaunchesRaw) {
-        self.launches = launches.launches
-        self.state = .loaded
+    func dataFetched(_ launchesResult: Result<LaunchesRaw, APIError>) {
+        switch launchesResult {
+        case let .success(launches):
+            self.launches = launches.launches
+            self.state = .loaded
+        case let .failure(apiError):
+            errorMessage = apiError.description
+        }
     }
 }
 
@@ -69,10 +75,10 @@ extension LaunchesViewController.ViewModel {
     }
 
     func errorOkButtonTapped() {
-
+        state = .networkIssue
     }
 
     func errorTryAgainButtonTapped() {
-
+        state = .loading
     }
 }

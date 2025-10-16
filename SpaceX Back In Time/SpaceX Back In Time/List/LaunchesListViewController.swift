@@ -122,8 +122,15 @@ extension LaunchesViewController {
         alert.addAction(confirmAction)
         alert.addAction(tryAgainAction)
 
-        self.present(alert, animated: true)
+        presentAlert(alert)
+    }
 
+    func presentAlert(_ alert: UIAlertController) {
+        Task {
+            await MainActor.run {
+                self.present(alert, animated: true)
+            }
+        }
     }
 }
 
