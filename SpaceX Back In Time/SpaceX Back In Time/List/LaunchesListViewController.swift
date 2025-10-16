@@ -21,7 +21,6 @@ extension LaunchesViewController {
     }
 }
 
-
 // MARK: - Life Cycle
 
 extension LaunchesViewController {
@@ -106,7 +105,11 @@ extension LaunchesViewController {
 
         viewModel.$showLoadingRow
             .sink { [weak self] _ in
-                self?.tableView.reloadData()
+                Task {
+                    await MainActor.run {
+                        self?.tableView.reloadData()
+                    }
+                }
             }
             .store(in: &bindings)
     }
@@ -159,6 +162,7 @@ extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        viewModel.rendering(row: indexPath.row)
 
         if indexPath.row < viewModel.launches.count {
             return launchCell(indexPath: indexPath)

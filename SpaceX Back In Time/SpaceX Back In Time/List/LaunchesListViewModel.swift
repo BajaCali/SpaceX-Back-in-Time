@@ -1,15 +1,6 @@
 import Combine
 import Dependencies
 
-extension LaunchesViewController.ViewModel {
-    enum State {
-        case initial
-        case loading
-        case networkIssue
-        case loaded
-    }
-}
-
 extension LaunchesViewController {
     final class ViewModel {
         @Published var launches: [Launch]
@@ -22,10 +13,13 @@ extension LaunchesViewController {
         @Published var errorMessage: String?
         @Published var showLoadingRow: Bool
 
+        var pageInLoad: Int?
+        var pagesAvailable: Int?
+
         init() {
             self.launches = .init()
             self.state = .initial
-            self.showLoadingRow = true
+            self.showLoadingRow = false
         }
 
         @Dependency(LaunchesFetcher.self) var launchesFetcher
@@ -35,11 +29,23 @@ extension LaunchesViewController {
 // MARK: - Functional
 
 extension LaunchesViewController.ViewModel {
-    func fetchAdditionalData() {
+    private func fetchAdditionalData() {
+        guard state.isLoading == false else { return }
+        if launches.isNotEmpty {
+            showLoadingRow = true
+        }
+        let nextPage = {
+            (launches.count / SpaceXRouter.pageLimit) + 1
+        }()
+        state = .loading
+        fetchLaunches(page: nextPage)
+    }
+
+    private func fetchLaunches(page: Int) {
         Task(priority: .userInitiated) {
             do {
-                let launches: LaunchesRaw = try await launchesFetcher.getLaunchesPage(0)
-//                let launches: LaunchesRaw = try await LaunchesFetcher.previewValue.getLaunchesPage(0)
+                let launches: LaunchesRaw = try await launchesFetcher.getLaunchesPage(page)
+//                let launches: LaunchesRaw = try await LaunchesFetcher.previewValue.getLaunchesPage(1)
                 dataFetched(.success(launches))
             } catch {
                 guard let apiError = error as? APIError else { return }
@@ -48,12 +54,15 @@ extension LaunchesViewController.ViewModel {
         }
     }
 
-    func dataFetched(_ launchesResult: Result<LaunchesRaw, APIError>) {
+    private func dataFetched(_ launchesResult: Result<LaunchesRaw, APIError>) {
+        self.showLoadingRow = false
         switch launchesResult {
         case let .success(launches):
-            self.launches = launches.launches
+            self.launches.append(contentsOf: launches.launches)
             self.state = .loaded
+
         case let .failure(apiError):
+            state = .networkIssue
             errorMessage = apiError.description
         }
     }
@@ -72,7 +81,6 @@ extension LaunchesViewController.ViewModel {
     }
 
     func onAppear() {
-        state = .loading
         fetchAdditionalData()
     }
 
@@ -82,6 +90,12 @@ extension LaunchesViewController.ViewModel {
 
     func errorTryAgainButtonTapped() {
         fetchAdditionalData()
-        state = .loading
+    }
+
+    func rendering(row: Int) {
+        let isNearBottom = row >= (launches.count - 2)
+        if isNearBottom {
+            fetchAdditionalData()
+        }
     }
 }

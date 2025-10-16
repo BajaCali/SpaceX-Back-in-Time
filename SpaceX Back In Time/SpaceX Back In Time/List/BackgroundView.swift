@@ -40,7 +40,7 @@ extension BackgroundView: View {
     var body: some View {
         Group {
             switch state {
-            case .initial, .loaded:
+            case .initial, .loaded, .loadingMore:
                 EmptyView()
             case .loading:
                 ProgressView("Waiting for launches to land...")
