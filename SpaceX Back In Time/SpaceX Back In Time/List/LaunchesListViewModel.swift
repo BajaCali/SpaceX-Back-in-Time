@@ -13,17 +13,19 @@ extension LaunchesViewController.ViewModel {
 extension LaunchesViewController {
     final class ViewModel {
         @Published var launches: [Launch]
-        @Published var state: State = .initial {
+        @Published var state: State {
             didSet {
                 @Dependency(EventBroker.self) var eventBroker
                 eventBroker.post(.list(.stateUpdated(state)))
             }
         }
         @Published var errorMessage: String?
+        @Published var showLoadingRow: Bool
 
         init() {
             self.launches = .init()
             self.state = .initial
+            self.showLoadingRow = true
         }
 
         @Dependency(LaunchesFetcher.self) var launchesFetcher
@@ -61,8 +63,8 @@ extension LaunchesViewController.ViewModel {
 
 extension LaunchesViewController.ViewModel {
     func testButtonTapped() {
-        errorMessage = "An test error happend!"
         launches.append(Launch.mockLaunches.randomElement()!)
+        showLoadingRow.toggle()
     }
 
     func launchTapped(_ launch: Launch) {

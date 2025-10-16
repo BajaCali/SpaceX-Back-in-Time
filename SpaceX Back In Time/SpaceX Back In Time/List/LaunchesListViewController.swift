@@ -8,10 +8,19 @@ class LaunchesViewController: UIViewController {
 
     private var viewModel = ViewModel()
 
-    private var cancellables = Set<AnyCancellable>()
+    private var bindings = Set<AnyCancellable>()
 
-    private let cellIdentifier = "LaunchCell"
 }
+
+// MARK: - Cells
+
+extension LaunchesViewController {
+    enum CellId: String, CaseIterable {
+        case launch
+        case loading
+    }
+}
+
 
 // MARK: - Life Cycle
 
@@ -33,7 +42,7 @@ extension LaunchesViewController {
     private func setupUI() {
         setupBackground()
         attachDelegates()
-        registerCell()
+        registerCells()
         attachTableView()
         setupNavigationBar()
     }
@@ -65,8 +74,10 @@ extension LaunchesViewController {
         tableView.delegate = self
     }
 
-    private func registerCell() {
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
+    private func registerCells() {
+        for cellId in CellId.allCases.map(\.rawValue) {
+            tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellId)
+        }
     }
 
     private func attachTableView() {
@@ -84,14 +95,20 @@ extension LaunchesViewController {
             .sink { [weak self] _ in
                 self?.tableView.reloadData()
             }
-            .store(in: &cancellables)
+            .store(in: &bindings)
 
         viewModel.$errorMessage
             .compactMap(\.self)
             .sink { [weak self] errorMessage in
                 self?.showErrorMessageAlert(errorMessage)
             }
-            .store(in: &cancellables)
+            .store(in: &bindings)
+
+        viewModel.$showLoadingRow
+            .sink { [weak self] _ in
+                self?.tableView.reloadData()
+            }
+            .store(in: &bindings)
     }
 }
 
@@ -134,21 +151,30 @@ extension LaunchesViewController {
     }
 }
 
-// MARK: - TableView connection
+// MARK: - TableView
 
 extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.launches.count
+        viewModel.launches.count + (viewModel.showLoadingRow ? 1 : 0)
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath)
 
+        if indexPath.row < viewModel.launches.count {
+            return launchCell(indexPath: indexPath)
+        }
+
+        let cell = tableView.dequeueReusableCell(withIdentifier: CellId.loading.rawValue, for: indexPath)
+        cell.contentConfiguration = UIHostingConfiguration { LoadingRow() }
+
+        return cell
+    }
+
+    private func launchCell(indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: CellId.launch.rawValue, for: indexPath)
         let launch = viewModel.launches[indexPath.row]
-
         cell.contentConfiguration = UIHostingConfiguration { RowView(launch: launch) }
         cell.accessoryType = .disclosureIndicator
-
         return cell
     }
 
