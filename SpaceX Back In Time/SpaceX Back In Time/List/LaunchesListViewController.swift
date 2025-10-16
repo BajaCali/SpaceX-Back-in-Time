@@ -108,12 +108,31 @@ extension LaunchesViewController {
                 self?.refreshTableView()
             }
             .store(in: &bindings)
+
+        viewModel.$state
+            .sink { [weak self] state in
+                self?.setScrolling(basedOn: state)
+            }
+            .store(in: &bindings)
     }
 }
 
-// MARK: - Alerts
+// MARK: - View Updates
 
 extension LaunchesViewController {
+    func setScrolling(basedOn state: ViewModel.State) {
+        Task {
+            await MainActor.run {
+                switch state {
+                case .initial, .loading, .networkIssue:
+                    tableView.isScrollEnabled = false
+                case .loadingMore, .loadingMoreFailed, .loaded:
+                    tableView.isScrollEnabled = true
+                }
+            }
+        }
+    }
+
     func showErrorMessageAlert(_ message: String) {
         Task {
             await MainActor.run {

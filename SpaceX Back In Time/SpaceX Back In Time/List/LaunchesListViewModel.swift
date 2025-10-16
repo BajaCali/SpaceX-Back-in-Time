@@ -23,12 +23,21 @@ extension LaunchesViewController {
         }
 
         @Dependency(LaunchesFetcher.self) var launchesFetcher
+        @Dependency(EventBroker.self) var eventBroker
     }
 }
 
 // MARK: - Functional
 
 extension LaunchesViewController.ViewModel {
+    private func handleEvent(_  event: Event) {
+        switch event {
+        case .list: return
+        case .background(.tryAgainButtonTapped):
+            fetchAdditionalData()
+        }
+    }
+
     private func fetchAdditionalData() {
         guard state.isLoading == false else { return }
         if launches.isNotEmpty {
@@ -37,7 +46,7 @@ extension LaunchesViewController.ViewModel {
         let nextPage = {
             (launches.count / SpaceXRouter.pageLimit) + 1
         }()
-        state = .loading
+        state = launches.isEmpty ? .loading : .loadingMore
         fetchLaunches(page: nextPage)
     }
 
@@ -62,8 +71,12 @@ extension LaunchesViewController.ViewModel {
             self.state = .loaded
 
         case let .failure(apiError):
-            state = .networkIssue
-            errorMessage = apiError.description
+            if launches.isEmpty {
+                state = .networkIssue(apiError.description)
+            } else {
+                state = .loadingMoreFailed
+                errorMessage = apiError.description
+            }
         }
     }
 }
@@ -82,10 +95,11 @@ extension LaunchesViewController.ViewModel {
 
     func onAppear() {
         fetchAdditionalData()
+        eventBroker.listen(self.handleEvent(_:))
     }
 
     func errorOkButtonTapped() {
-        state = .networkIssue
+
     }
 
     func errorTryAgainButtonTapped() {

@@ -5,7 +5,8 @@ extension LaunchesViewController.ViewModel {
         case initial
         case loading
         case loadingMore
-        case networkIssue
+        case networkIssue(String)
+        case loadingMoreFailed
         case loaded
     }
 }
