@@ -92,7 +92,7 @@ extension LaunchesViewController {
         viewModel.$launches
             .debounce(for: 0.1, scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                self?.tableView.reloadData()
+                self?.refreshTableView()
             }
             .store(in: &bindings)
 
@@ -105,11 +105,7 @@ extension LaunchesViewController {
 
         viewModel.$showLoadingRow
             .sink { [weak self] _ in
-                Task {
-                    await MainActor.run {
-                        self?.tableView.reloadData()
-                    }
-                }
+                self?.refreshTableView()
             }
             .store(in: &bindings)
     }
@@ -119,35 +115,31 @@ extension LaunchesViewController {
 
 extension LaunchesViewController {
     func showErrorMessageAlert(_ message: String) {
-        let confirmAction = UIAlertAction(
-            title: "Ok",
-            style: .cancel
-        ) { [weak self] _ in
-            self?.viewModel.errorOkButtonTapped()
-        }
-
-        let tryAgainAction = UIAlertAction(
-            title: "Try Again",
-            style: .default
-        ) { [weak self] _ in
-            self?.viewModel.errorTryAgainButtonTapped()
-        }
-
-        let alert = UIAlertController(
-            title: "Network Error",
-            message: message,
-            preferredStyle: .alert
-        )
-
-        alert.addAction(confirmAction)
-        alert.addAction(tryAgainAction)
-
-        presentAlert(alert)
-    }
-
-    func presentAlert(_ alert: UIAlertController) {
         Task {
             await MainActor.run {
+                let confirmAction = UIAlertAction(
+                    title: "Ok",
+                    style: .cancel
+                ) { [weak self] _ in
+                    self?.viewModel.errorOkButtonTapped()
+                }
+
+                let tryAgainAction = UIAlertAction(
+                    title: "Try Again",
+                    style: .default
+                ) { [weak self] _ in
+                    self?.viewModel.errorTryAgainButtonTapped()
+                }
+
+                let alert = UIAlertController(
+                    title: "Network Error",
+                    message: message,
+                    preferredStyle: .alert
+                )
+
+                alert.addAction(confirmAction)
+                alert.addAction(tryAgainAction)
+
                 self.present(alert, animated: true)
             }
         }
@@ -186,5 +178,13 @@ extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         let selectedLaunch = viewModel.launches[indexPath.row]
         viewModel.launchTapped(selectedLaunch)
+    }
+
+    private func refreshTableView() {
+        Task {
+            await MainActor.run {
+                tableView.reloadData()
+            }
+        }
     }
 }
