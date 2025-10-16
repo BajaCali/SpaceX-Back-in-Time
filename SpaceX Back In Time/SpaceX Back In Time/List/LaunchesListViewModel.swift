@@ -79,6 +79,7 @@ extension LaunchesViewController.ViewModel {
     }
 
     func errorTryAgainButtonTapped() {
+        fetchAdditionalData()
         state = .loading
     }
 }
