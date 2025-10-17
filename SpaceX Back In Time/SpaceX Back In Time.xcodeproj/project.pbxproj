@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		90BA55E62E9E97AE0086A85D /* Dependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 90BA55E52E9E97AE0086A85D /* Dependencies */; };
+		90BA55E82E9E97AE0086A85D /* DependenciesMacros in Frameworks */ = {isa = PBXBuildFile; productRef = 90BA55E72E9E97AE0086A85D /* DependenciesMacros */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		90BA55332E9D32D20086A85D /* SpaceX Back In Time.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SpaceX Back In Time.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +28,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				90BA55E82E9E97AE0086A85D /* DependenciesMacros in Frameworks */,
+				90BA55E62E9E97AE0086A85D /* Dependencies in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -66,6 +73,8 @@
 			);
 			name = "SpaceX Back In Time";
 			packageProductDependencies = (
+				90BA55E52E9E97AE0086A85D /* Dependencies */,
+				90BA55E72E9E97AE0086A85D /* DependenciesMacros */,
 			);
 			productName = "SpaceX Back In Time";
 			productReference = 90BA55332E9D32D20086A85D /* SpaceX Back In Time.app */;
@@ -97,6 +106,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				90BA55552E9E795E0086A85D /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
+				90BA55E42E9E97AE0086A85D /* XCRemoteSwiftPackageReference "swift-dependencies" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 90BA55342E9D32D20086A85D /* Products */;
@@ -272,6 +282,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -303,6 +314,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -351,6 +363,14 @@
 				minimumVersion = 0.62.1;
 			};
 		};
+		90BA55E42E9E97AE0086A85D /* XCRemoteSwiftPackageReference "swift-dependencies" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-dependencies.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.10.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -358,6 +378,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 90BA55552E9E795E0086A85D /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
 			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
+		90BA55E52E9E97AE0086A85D /* Dependencies */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 90BA55E42E9E97AE0086A85D /* XCRemoteSwiftPackageReference "swift-dependencies" */;
+			productName = Dependencies;
+		};
+		90BA55E72E9E97AE0086A85D /* DependenciesMacros */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 90BA55E42E9E97AE0086A85D /* XCRemoteSwiftPackageReference "swift-dependencies" */;
+			productName = DependenciesMacros;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

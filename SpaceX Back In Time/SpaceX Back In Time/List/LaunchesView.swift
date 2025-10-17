@@ -2,7 +2,6 @@ import SwiftUI
 import UIKit
 
 struct LaunchesView: UIViewControllerRepresentable {
-
     func makeUIViewController(context: Context) -> UINavigationController {
         let launchesVC = LaunchesViewController()
 
@@ -15,4 +14,8 @@ struct LaunchesView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {
         // no updates needed
     }
+}
+
+#Preview {
+    LaunchesView()
 }

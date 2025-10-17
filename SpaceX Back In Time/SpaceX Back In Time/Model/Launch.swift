@@ -1,8 +1,12 @@
 import Foundation
 
+// MARK: - Struct
+
 struct Launch {
     let title: String
     var isFavourite: Bool
+    var date: Date
+    var flightNumber: Int
 }
 
 // MARK: - Mocks
@@ -10,12 +14,20 @@ struct Launch {
 extension Launch {
     static var mockLaunches: [Launch] {
         return [
-            Launch(title: "Falcon 9 - Starlink Mission", isFavourite: true),
-            Launch(title: "Atlas V - GOES-T", isFavourite: false),
-            Launch(title: "Artemis I - Orion Spacecraft", isFavourite: true),
-            Launch(title: "Soyuz MS-22", isFavourite: false),
-            Launch(title: "Long March 5B - Wentian", isFavourite: false),
-            Launch(title: "Vega-C - LARES 2", isFavourite: true)
+            Launch(title: "Falcon 9 - Starlink Mission", isFavourite: true, date: .now, flightNumber: 21)
         ]
+    }
+}
+
+// MARK: - Raw -> App
+
+extension Launch {
+    static func from(raw rawLaunch: LaunchRaw) -> Launch {
+        Launch(
+            title: rawLaunch.name,
+            isFavourite: rawLaunch.success ?? true,
+            date: Date(timeIntervalSince1970: TimeInterval(rawLaunch.date_unix)),
+            flightNumber: rawLaunch.flight_number,
+        )
     }
 }

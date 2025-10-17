@@ -1,27 +1,69 @@
 import UIKit
 import SwiftUI
+import Combine
 
 class LaunchesViewController: UIViewController {
     private let tableView = UITableView()
-    private var launches: [Launch] = Launch.mockLaunches
+    private let backgroundView = UIView()
 
-    private let cellIdentifier = "LaunchCell"
+    private var viewModel = ViewModel()
 
+    private var bindings = Set<AnyCancellable>()
+}
+
+// MARK: - Cells
+
+extension LaunchesViewController {
+    enum CellId: String, CaseIterable {
+        case launch
+        case loading
+    }
+}
+
+// MARK: - Life Cycle
+
+extension LaunchesViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        bindViewModelUpdates()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        viewModel.onAppear()
+    }
+}
+
+// MARK: - View Setup
+
+extension LaunchesViewController {
     private func setupUI() {
-        setupViewUI()
+        setupBackground()
         attachDelegates()
-        registerCell()
+        registerCells()
         attachTableView()
+        setupNavigationBar()
     }
 
-    private func setupViewUI() {
+    private func setupBackground() {
+        let swiftUIView = UIHostingController(rootView: BackgroundView(initialState: viewModel.state))
+
+        backgroundView.addSubview(swiftUIView.view)
+
+        swiftUIView.view.pin(to: backgroundView)
+        tableView.backgroundView = backgroundView
+    }
+
+    private func setupNavigationBar() {
         self.title = "Rocket Launches 🚀"
-        self.toolbarItems = [ ]
+        addToolbarButton()
+    }
+
+    private func addToolbarButton() {
+        let testButtonVC = UIHostingController(rootView: ToolbarButton(action: viewModel.testButtonTapped))
+        let barButton = UIBarButtonItem(customView: testButtonVC.view)
+        testButtonVC.view.backgroundColor = .clear
+        self.navigationItem.rightBarButtonItem = barButton
     }
 
     private func attachDelegates() {
@@ -29,8 +71,10 @@ class LaunchesViewController: UIViewController {
         tableView.delegate = self
     }
 
-    private func registerCell() {
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
+    private func registerCells() {
+        for cellId in CellId.allCases.map(\.rawValue) {
+            tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellId)
+        }
     }
 
     private func attachTableView() {
@@ -39,26 +83,125 @@ class LaunchesViewController: UIViewController {
     }
 }
 
+// MARK: - ViewModel Bindings
+
+extension LaunchesViewController {
+    private func bindViewModelUpdates() {
+        viewModel.$launches
+            .debounce(for: 0.1, scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refreshTableView()
+            }
+            .store(in: &bindings)
+
+        viewModel.$errorMessage
+            .compactMap(\.self)
+            .sink { [weak self] errorMessage in
+                self?.showErrorMessageAlert(errorMessage)
+            }
+            .store(in: &bindings)
+
+        viewModel.$showLoadingRow
+            .sink { [weak self] _ in
+                self?.refreshTableView()
+            }
+            .store(in: &bindings)
+
+        viewModel.$state
+            .sink { [weak self] state in
+                self?.setScrolling(basedOn: state)
+            }
+            .store(in: &bindings)
+    }
+}
+
+// MARK: - View Updates
+
+extension LaunchesViewController {
+    func setScrolling(basedOn state: ViewModel.State) {
+        Task {
+            await MainActor.run {
+                switch state {
+                case .initial, .loading, .networkIssue:
+                    tableView.isScrollEnabled = false
+                case .loadingMore, .loadingMoreFailed, .loaded:
+                    tableView.isScrollEnabled = true
+                }
+            }
+        }
+    }
+
+    func showErrorMessageAlert(_ message: String) {
+        Task {
+            await MainActor.run {
+                let confirmAction = UIAlertAction(
+                    title: "Ok",
+                    style: .cancel
+                ) { [weak self] _ in
+                    self?.viewModel.errorOkButtonTapped()
+                }
+
+                let tryAgainAction = UIAlertAction(
+                    title: "Try Again",
+                    style: .default
+                ) { [weak self] _ in
+                    self?.viewModel.errorTryAgainButtonTapped()
+                }
+
+                let alert = UIAlertController(
+                    title: "Network Error",
+                    message: message,
+                    preferredStyle: .alert
+                )
+
+                alert.addAction(confirmAction)
+                alert.addAction(tryAgainAction)
+
+                self.present(alert, animated: true)
+            }
+        }
+    }
+}
+
+// MARK: - TableView
+
 extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return launches.count
+        viewModel.launches.count + (viewModel.showLoadingRow ? 1 : 0)
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath)
+        viewModel.rendering(row: indexPath.row)
 
-        let launch = launches[indexPath.row]
+        if indexPath.row < viewModel.launches.count {
+            return launchCell(indexPath: indexPath)
+        }
 
+        let cell = tableView.dequeueReusableCell(withIdentifier: CellId.loading.rawValue, for: indexPath)
+        cell.contentConfiguration = UIHostingConfiguration { LoadingRow() }
+
+        return cell
+    }
+
+    private func launchCell(indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: CellId.launch.rawValue, for: indexPath)
+        let launch = viewModel.launches[indexPath.row]
         cell.contentConfiguration = UIHostingConfiguration { RowView(launch: launch) }
         cell.accessoryType = .disclosureIndicator
-
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        let selectedLaunch = viewModel.launches[indexPath.row]
+        viewModel.launchTapped(selectedLaunch)
+    }
 
-        let selectedLaunch = launches[indexPath.row]
-        print("Tapped on: \(selectedLaunch.title)")
+    private func refreshTableView() {
+        Task {
+            await MainActor.run {
+                tableView.reloadData()
+            }
+        }
     }
 }
