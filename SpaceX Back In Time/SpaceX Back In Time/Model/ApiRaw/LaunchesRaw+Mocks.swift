@@ -1,6 +1,7 @@
 // swiftlint:disable all
 import Foundation
 
+#if DEBUG
 extension LaunchesRaw {
     static var firstPage: Data {
         """
@@ -8,4 +9,6 @@ extension LaunchesRaw {
 """.data(using: .utf8)!
     }
 }
+#endif
+
 // swiftlint:enable all

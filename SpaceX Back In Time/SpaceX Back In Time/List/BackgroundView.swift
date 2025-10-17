@@ -12,7 +12,6 @@ extension BackgroundView {
 struct BackgroundView {
     @State private var state: LaunchesViewController.ViewModel.State
     @State private var startDate = Date.now
-    @State private var startAnimation = false
 
     init(initialState: LaunchesViewController.ViewModel.State) {
         self.state = initialState
@@ -22,7 +21,6 @@ struct BackgroundView {
 
     func onAppear() {
         eventBroker.listen(self.handleEvent(_:))
-        startAnimation.toggle()
     }
 
     func handleEvent(_ event: Event) {
@@ -33,6 +31,8 @@ struct BackgroundView {
         }
     }
 }
+
+// MARK: - View
 
 extension BackgroundView: View {
     var body: some View {
@@ -105,6 +105,8 @@ extension BackgroundView: View {
         }
     }
 }
+
+// MARK: - Previews
 
 #Preview("Loading") {
     BackgroundView(initialState: .loading)

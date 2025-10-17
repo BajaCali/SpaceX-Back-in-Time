@@ -1,6 +1,8 @@
 import Combine
 import Dependencies
 
+// MARK: - Class
+
 extension LaunchesViewController {
     final class ViewModel {
         @Published var launches: [Launch]
@@ -21,6 +23,8 @@ extension LaunchesViewController {
             self.state = .initial
             self.showLoadingRow = false
         }
+
+        // MARK: Dependencies
 
         @Dependency(LaunchesFetcher.self) var launchesFetcher
         @Dependency(EventBroker.self) var eventBroker

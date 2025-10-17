@@ -49,7 +49,6 @@ extension LaunchesViewController {
         let swiftUIView = UIHostingController(rootView: BackgroundView(initialState: viewModel.state))
 
         backgroundView.addSubview(swiftUIView.view)
-        backgroundView.layoutSubviews()
 
         swiftUIView.view.pin(to: backgroundView)
         tableView.backgroundView = backgroundView
