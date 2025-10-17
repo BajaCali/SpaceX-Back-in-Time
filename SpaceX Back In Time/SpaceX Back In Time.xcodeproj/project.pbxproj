@@ -7,15 +7,32 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9028714B2EA23DA10086D0E0 /* License2Chill in Frameworks */ = {isa = PBXBuildFile; productRef = 9028714A2EA23DA10086D0E0 /* License2Chill */; };
 		90BA55E62E9E97AE0086A85D /* Dependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 90BA55E52E9E97AE0086A85D /* Dependencies */; };
 		90BA55E82E9E97AE0086A85D /* DependenciesMacros in Frameworks */ = {isa = PBXBuildFile; productRef = 90BA55E72E9E97AE0086A85D /* DependenciesMacros */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		902871412EA23D080086D0E0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 90BA552B2E9D32D20086A85D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 90BA55322E9D32D20086A85D;
+			remoteInfo = "SpaceX Back In Time";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		9028713D2EA23D080086D0E0 /* SpaceX Back In TimeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SpaceX Back In TimeTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		90BA55332E9D32D20086A85D /* SpaceX Back In Time.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SpaceX Back In Time.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		9028713E2EA23D080086D0E0 /* SpaceX Back In TimeTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "SpaceX Back In TimeTests";
+			sourceTree = "<group>";
+		};
 		90BA55352E9D32D20086A85D /* SpaceX Back In Time */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "SpaceX Back In Time";
@@ -24,6 +41,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		9028713A2EA23D080086D0E0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9028714B2EA23DA10086D0E0 /* License2Chill in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		90BA55302E9D32D20086A85D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -40,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				90BA55352E9D32D20086A85D /* SpaceX Back In Time */,
+				9028713E2EA23D080086D0E0 /* SpaceX Back In TimeTests */,
 				90BA55342E9D32D20086A85D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -48,6 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				90BA55332E9D32D20086A85D /* SpaceX Back In Time.app */,
+				9028713D2EA23D080086D0E0 /* SpaceX Back In TimeTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -55,6 +82,30 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		9028713C2EA23D080086D0E0 /* SpaceX Back In TimeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 902871452EA23D080086D0E0 /* Build configuration list for PBXNativeTarget "SpaceX Back In TimeTests" */;
+			buildPhases = (
+				902871392EA23D080086D0E0 /* Sources */,
+				9028713A2EA23D080086D0E0 /* Frameworks */,
+				9028713B2EA23D080086D0E0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				902871422EA23D080086D0E0 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				9028713E2EA23D080086D0E0 /* SpaceX Back In TimeTests */,
+			);
+			name = "SpaceX Back In TimeTests";
+			packageProductDependencies = (
+				9028714A2EA23DA10086D0E0 /* License2Chill */,
+			);
+			productName = "SpaceX Back In TimeTests";
+			productReference = 9028713D2EA23D080086D0E0 /* SpaceX Back In TimeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		90BA55322E9D32D20086A85D /* SpaceX Back In Time */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 90BA553E2E9D32D30086A85D /* Build configuration list for PBXNativeTarget "SpaceX Back In Time" */;
@@ -90,6 +141,10 @@
 				LastSwiftUpdateCheck = 1630;
 				LastUpgradeCheck = 1630;
 				TargetAttributes = {
+					9028713C2EA23D080086D0E0 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 90BA55322E9D32D20086A85D;
+					};
 					90BA55322E9D32D20086A85D = {
 						CreatedOnToolsVersion = 16.3;
 					};
@@ -107,6 +162,7 @@
 			packageReferences = (
 				90BA55552E9E795E0086A85D /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 				90BA55E42E9E97AE0086A85D /* XCRemoteSwiftPackageReference "swift-dependencies" */,
+				902871492EA23DA10086D0E0 /* XCRemoteSwiftPackageReference "license2chill" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 90BA55342E9D32D20086A85D /* Products */;
@@ -114,11 +170,19 @@
 			projectRoot = "";
 			targets = (
 				90BA55322E9D32D20086A85D /* SpaceX Back In Time */,
+				9028713C2EA23D080086D0E0 /* SpaceX Back In TimeTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		9028713B2EA23D080086D0E0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		90BA55312E9D32D20086A85D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -129,6 +193,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		902871392EA23D080086D0E0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		90BA552F2E9D32D20086A85D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -139,6 +210,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		902871422EA23D080086D0E0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 90BA55322E9D32D20086A85D /* SpaceX Back In Time */;
+			targetProxy = 902871412EA23D080086D0E0 /* PBXContainerItemProxy */;
+		};
 		90BA55572E9E79BF0086A85D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			productRef = 90BA55562E9E79BF0086A85D /* SwiftLintBuildToolPlugin */;
@@ -146,6 +222,42 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		902871432EA23D080086D0E0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = JZVXBJY89L;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "me.michalnemec.SpaceX-Back-In-TimeTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SpaceX Back In Time.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SpaceX Back In Time";
+			};
+			name = Debug;
+		};
+		902871442EA23D080086D0E0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = JZVXBJY89L;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "me.michalnemec.SpaceX-Back-In-TimeTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SpaceX Back In Time.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SpaceX Back In Time";
+			};
+			name = Release;
+		};
 		90BA553C2E9D32D30086A85D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -334,6 +446,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		902871452EA23D080086D0E0 /* Build configuration list for PBXNativeTarget "SpaceX Back In TimeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				902871432EA23D080086D0E0 /* Debug */,
+				902871442EA23D080086D0E0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		90BA552E2E9D32D20086A85D /* Build configuration list for PBXProject "SpaceX Back In Time" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -355,6 +476,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		902871492EA23DA10086D0E0 /* XCRemoteSwiftPackageReference "license2chill" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://gitlab.com/apodidae/license2chill";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.1;
+			};
+		};
 		90BA55552E9E795E0086A85D /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
@@ -374,6 +503,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		9028714A2EA23DA10086D0E0 /* License2Chill */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 902871492EA23DA10086D0E0 /* XCRemoteSwiftPackageReference "license2chill" */;
+			productName = License2Chill;
+		};
 		90BA55562E9E79BF0086A85D /* SwiftLintBuildToolPlugin */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 90BA55552E9E795E0086A85D /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;

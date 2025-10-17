@@ -4,9 +4,14 @@ import Foundation
 
 struct Launch {
     let title: String
-    var isFavourite: Bool
+    var success: Bool
     var date: Date
     var flightNumber: Int
+    var details: String?
+    var rocketId: String
+    var capsulesIds: [String]
+    var payloadsIds: [String]
+    var launchpadId: String
 }
 
 // MARK: - Fitler
@@ -22,7 +27,17 @@ extension Launch {
 extension Launch {
     static var mockLaunches: [Launch] {
         return [
-            Launch(title: "Falcon 9 - Starlink Mission", isFavourite: true, date: .now, flightNumber: 21)
+            Launch(
+                title: "Falcon 9 - Starlink Mission",
+                success: true,
+                date: .now,
+                flightNumber: 21,
+                details: "Detail of Falcon 9 Starling Mission",
+                rocketId: "",
+                capsulesIds: [],
+                payloadsIds: [],
+                launchpadId: ""
+            )
         ]
     }
 }
@@ -31,11 +46,17 @@ extension Launch {
 
 extension Launch {
     static func from(raw rawLaunch: LaunchRaw) -> Launch {
-        Launch(
+        print(rawLaunch.name, "has details:", rawLaunch.details != nil)
+        return Launch(
             title: rawLaunch.name,
-            isFavourite: rawLaunch.success ?? true,
+            success: rawLaunch.success ?? true,
             date: Date(timeIntervalSince1970: TimeInterval(rawLaunch.date_unix)),
             flightNumber: rawLaunch.flight_number,
+            details: rawLaunch.details,
+            rocketId: rawLaunch.rocket,
+            capsulesIds: rawLaunch.capsules,
+            payloadsIds: rawLaunch.payloads,
+            launchpadId: rawLaunch.launchpad
         )
     }
 }
