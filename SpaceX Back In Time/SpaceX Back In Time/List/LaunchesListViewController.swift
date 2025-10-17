@@ -178,6 +178,12 @@ extension LaunchesViewController {
             }
         }
     }
+
+    private func pushDetail(for launch: Launch) {
+        let detailController = UIHostingController(rootView: LaunchDetail(launch))
+        detailController.title = launch.title
+        navigationController?.pushViewController(detailController, animated: true)
+    }
 }
 
 // MARK: - Search
@@ -220,6 +226,7 @@ extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         let selectedLaunch = viewModel.filteredLaunches[indexPath.row]
         viewModel.launchTapped(selectedLaunch)
+        pushDetail(for: selectedLaunch)
     }
 
     private func refreshTableView() {

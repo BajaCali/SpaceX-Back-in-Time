@@ -108,10 +108,6 @@ extension LaunchesViewController.ViewModel {
         showLoadingRow.toggle()
     }
 
-    func launchTapped(_ launch: Launch) {
-        print("Tapped on: \(launch.title)")
-    }
-
     func onAppear() {
         fetchAdditionalData()
         eventBroker.listen(self.handleEvent(_:))
