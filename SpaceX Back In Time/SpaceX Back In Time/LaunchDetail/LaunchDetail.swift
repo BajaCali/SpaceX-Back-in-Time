@@ -15,11 +15,10 @@ struct LaunchDetail {
 extension LaunchDetail: View {
     var body: some View {
         List {
-            patch
+            images
             infoSection
             moreDetailsSection
             discussionsSection
-            photosSections
         }
     }
 }
@@ -27,10 +26,11 @@ extension LaunchDetail: View {
 // MARK: - Sections
 
 extension LaunchDetail {
-    var patch: some View {
-        Section {
-            PatchImageView(url: launch.patch?.large ?? launch.patch?.small)
-        }
+    var images: some View {
+        ImagesView(
+            patch: launch.patch?.large,
+            images: launch.flickr?.original ?? []
+        )
         .listRowInsets(EdgeInsets())
         .listRowBackground(Color.clear)
     }
@@ -104,40 +104,9 @@ extension LaunchDetail {
 
         }
     }
-
-    @ViewBuilder
-    var photosSections: some View {
-        if let flickr = launch.flickr, flickr.original.isNotEmpty {
-            Section("Photos") {
-                FlickrImageViewer(urls: flickr.original)
-            }
-        }
-    }
 }
 
 // MARK: - Support Views
-
-struct PatchImageView: View {
-    let url: URL?
-
-    var body: some View {
-        if let url {
-            HStack {
-                Spacer()
-                AsyncImage(url: url) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                } placeholder: {
-                    ProgressView()
-                }
-                .frame(height: 200)
-                .padding()
-                Spacer()
-            }
-        }
-    }
-}
 
 struct InfoRow: View {
     let label: String
@@ -156,34 +125,52 @@ struct InfoRow: View {
     }
 }
 
-struct FlickrImageViewer: View {
-    let urls: [URL]
+struct ImagesView: View {
+    let patch: URL?
+    let images: [URL]
+
+    @State private var size: CGSize = .zero
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack {
-                ForEach(urls, id: \.self) { url in
-                    AsyncImage(url: url) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 150, height: 150)
-                            .clipped()
-                            .cornerRadius(8)
-                    } placeholder: {
-                        ProgressView()
-                            .frame(width: 150, height: 150)
+        if let patch {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 0) {
+                    ImageWithHorizontalBorders(url: patch, width: size.width)
+                    ForEach(images, id: \.self) { url in
+                        ImageWithHorizontalBorders(url: url, width: size.width)
                     }
                 }
             }
+            .frame(height: 200)
+            .scrollTargetBehavior(.paging)
+            .sizeReader($size)
         }
+    }
+}
+
+struct ImageWithHorizontalBorders: View {
+    let url: URL
+    let width: CGFloat
+
+    var body: some View {
+        AsyncImage(url: url) { image in
+            image
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(height: 200)
+                .clipped()
+                .cornerRadius(8)
+        } placeholder: {
+            ProgressView()
+        }
+        .frame(width: width, alignment: .center)
     }
 }
 
 // MARK: - Preview
 
 #Preview {
-    let launch = Launch.mockLaunches.first!
+    let launch = Launch.withImages
 
     NavigationStack {
         LaunchDetail(launch)

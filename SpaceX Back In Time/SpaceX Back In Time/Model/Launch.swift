@@ -122,12 +122,16 @@ extension Launch {
             )
         }
 
+        if flickr?.original.isNotEmpty ?? false {
+            print("\(rawLaunch.name) has images")
+        }
+
         let presskitURL = rawLaunch.links?.presskit.flatMap(URL.init)
         let youtubeURL = rawLaunch.links?.youtube_id.flatMap { URL(string: "https://www.youtube.com/watch?v=\($0)") }
         let articleURL = rawLaunch.links?.article.flatMap(URL.init)
         let wikipediaURL = rawLaunch.links?.wikipedia.flatMap(URL.init)
 
-        return Launch(
+        let launch = Launch(
             title: rawLaunch.name,
             success: rawLaunch.success ?? true,
             date: Date(timeIntervalSince1970: TimeInterval(rawLaunch.date_unix)),
@@ -145,5 +149,13 @@ extension Launch {
             articleURL: articleURL,
             wikipediaURL: wikipediaURL
         )
+
+        if launch.flickr?.original.isNotEmpty ?? false {
+            print(launch)
+            dump(launch)
+            debugPrint(launch)
+        }
+
+        return launch
     }
 }
