@@ -106,67 +106,6 @@ extension LaunchDetail {
     }
 }
 
-// MARK: - Support Views
-
-struct InfoRow: View {
-    let label: String
-    let value: String
-
-    var body: some View {
-        HStack {
-            Text(label)
-                .font(.headline)
-            Spacer()
-            Text(value)
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.trailing)
-        }
-    }
-}
-
-struct ImagesView: View {
-    let patch: URL?
-    let images: [URL]
-
-    @State private var size: CGSize = .zero
-
-    var body: some View {
-        if let patch {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 0) {
-                    ImageWithHorizontalBorders(url: patch, width: size.width)
-                    ForEach(images, id: \.self) { url in
-                        ImageWithHorizontalBorders(url: url, width: size.width)
-                    }
-                }
-            }
-            .frame(height: 200)
-            .scrollTargetBehavior(.paging)
-            .sizeReader($size)
-        }
-    }
-}
-
-struct ImageWithHorizontalBorders: View {
-    let url: URL
-    let width: CGFloat
-
-    var body: some View {
-        AsyncImage(url: url) { image in
-            image
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(height: 200)
-                .clipped()
-                .cornerRadius(8)
-        } placeholder: {
-            ProgressView()
-        }
-        .frame(width: width, alignment: .center)
-    }
-}
-
 // MARK: - Preview
 
 #Preview {
