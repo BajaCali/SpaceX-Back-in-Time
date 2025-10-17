@@ -37,6 +37,10 @@ extension Endpoint {
         request.allHTTPHeaderFields = headers
         request.httpBody = body
 
+#if targetEnvironment(simulator)
+    request.assumesHTTP3Capable = false
+#endif
+
         return request
     }
 }
