@@ -19,9 +19,8 @@ final class APIManager {
     }()
 
     private func fetch(_ request: URLRequest) async throws(APIError) -> (Data, URLResponse) {
-        let session = URLSession(configuration: .ephemeral)
         do {
-            return try await session.data(for: request)
+            return try await urlSession.data(for: request)
         } catch {
             throw .requestError(error)
         }
