@@ -32,6 +32,7 @@ extension Endpoint {
         }
 
         var request = URLRequest(url: requestUrl)
+
         request.httpMethod = method.rawValue
         request.allHTTPHeaderFields = headers
         request.httpBody = body

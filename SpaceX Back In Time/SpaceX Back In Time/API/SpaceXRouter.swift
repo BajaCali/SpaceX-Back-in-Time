@@ -6,7 +6,7 @@ extension SpaceXRouter {
     static let pageLimit: Int = 12
 }
 
-// MARK: - paths
+// MARK: - Paths
 
 enum SpaceXRouter {
     case launches(page: Int)

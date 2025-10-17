@@ -9,7 +9,6 @@ class LaunchesViewController: UIViewController {
     private var viewModel = ViewModel()
 
     private var bindings = Set<AnyCancellable>()
-
 }
 
 // MARK: - Cells

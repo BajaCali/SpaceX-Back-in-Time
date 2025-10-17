@@ -1,5 +1,7 @@
 import Foundation
 
+// MARK: - Struct
+
 struct Launch {
     let title: String
     var isFavourite: Bool

@@ -2,7 +2,6 @@ import SwiftUI
 import UIKit
 
 struct LaunchesView: UIViewControllerRepresentable {
-
     func makeUIViewController(context: Context) -> UINavigationController {
         let launchesVC = LaunchesViewController()
 
