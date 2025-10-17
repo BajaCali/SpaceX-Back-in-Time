@@ -135,7 +135,7 @@ extension LaunchesViewController {
 // MARK: - View Updates
 
 extension LaunchesViewController {
-    func setScrolling(basedOn state: ViewModel.State) {
+    private func setScrolling(basedOn state: ViewModel.State) {
         Task {
             await MainActor.run {
                 switch state {
@@ -148,7 +148,7 @@ extension LaunchesViewController {
         }
     }
 
-    func showErrorMessageAlert(_ message: String) {
+    private func showErrorMessageAlert(_ message: String) {
         Task {
             await MainActor.run {
                 let confirmAction = UIAlertAction(
