@@ -1,12 +1,40 @@
 import SwiftUI
+import Dependencies
 
 // MARK: - Struct
 
 struct LaunchDetail {
-    let launch: Launch
+    @State private var launch: Launch
 
     init(_ launch: Launch) {
         self.launch = launch
+    }
+
+    @Dependency(EventBroker.self) var eventBroker
+}
+
+// MARK: - Business Logic
+
+extension LaunchDetail {
+    private func nextLaunchButtonTapped() {
+        eventBroker.post(.detail(.nextLaunchButtonTapped))
+    }
+
+    private func onDisappear() {
+        eventBroker.post(.detail(.dismissing))
+    }
+
+    private func onAppear() {
+        eventBroker.listen(.reusing(via: "LauchDetail"), handleEvents(_:))
+    }
+
+    private func handleEvents(_ event: Event) {
+        switch event {
+        case let .detail(.updateLaunchInDetail(launch, hasNext: hasNext, hasPrev: hasPrev)):
+            self.launch = launch
+            return
+        default: return
+        }
     }
 }
 
@@ -19,6 +47,13 @@ extension LaunchDetail: View {
             infoSection
             moreDetailsSection
             discussionsSection
+        }
+        .onAppear(perform: onAppear)
+        .onDisappear(perform: onDisappear)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Next Launch", systemImage: "arrow.down.circle", action: nextLaunchButtonTapped)
+            }
         }
     }
 }

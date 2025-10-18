@@ -27,9 +27,6 @@ extension LaunchesViewController {
         super.viewDidLoad()
         setupUI()
         bindViewModelUpdates()
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
         viewModel.onAppear()
     }
 }
@@ -226,6 +223,7 @@ extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         let selectedLaunch = viewModel.filteredLaunches[indexPath.row]
         viewModel.launchTapped(selectedLaunch)
+        viewModel.selected(row: indexPath.row)
         pushDetail(for: selectedLaunch)
     }
 

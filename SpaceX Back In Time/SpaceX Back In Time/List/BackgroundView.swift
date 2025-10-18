@@ -19,7 +19,7 @@ struct BackgroundView {
     @Dependency(EventBroker.self) var eventBroker
 
     func onAppear() {
-        eventBroker.listen(self.handleEvent(_:))
+        eventBroker.listen(.reusing(via: "Background"), self.handleEvent(_:))
     }
 
     func handleEvent(_ event: Event) {
