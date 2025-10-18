@@ -2,7 +2,7 @@ import SwiftUI
 
 struct LoadingRow: View {
     var body: some View {
-        ProgressView()
+        HorizontalProgressView()
             .frame(maxWidth: .infinity, alignment: .center)
     }
 }
