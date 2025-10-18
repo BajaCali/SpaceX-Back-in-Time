@@ -15,8 +15,7 @@ extension LaunchesViewController {
         @Published var errorMessage: String?
         @Published var showLoadingRow: Bool
 
-        var pageInLoad: Int?
-        var pagesAvailable: Int?
+        var launchIndexInDetail: Int?
 
         init() {
             self.launches = .init()
@@ -34,13 +33,35 @@ extension LaunchesViewController {
 // MARK: - Functional
 
 extension LaunchesViewController.ViewModel {
+
+    // MARK: Events
+
     private func handleEvent(_  event: Event) {
         switch event {
         case .list: return
+
+        case .detail(.nextLaunchButtonTapped):
+            guard
+                let currentLaunchIndex = launchIndexInDetail,
+                currentLaunchIndex < (launches.endIndex - 1)
+            else {
+                return
+            }
+            sendNewLaunchToDetail(at: currentLaunchIndex + 1)
+
+            return
+        case .detail(.prevLaunchButtonTapped):
+            return
+        case .detail(.dismissing):
+            launchIndexInDetail = nil
+        case .detail: return
+
         case .background(.tryAgainButtonTapped):
             fetchAdditionalData()
         }
     }
+
+    // MARK: Fetching
 
     private func fetchAdditionalData() {
         guard state.isLoading == false else { return }
@@ -83,6 +104,14 @@ extension LaunchesViewController.ViewModel {
             }
         }
     }
+
+    // MARK: Other
+
+    private func sendNewLaunchToDetail(at index: Int) {
+        let nextLaunch = launches[index]
+        eventBroker.post(.detail(.updateLaunchInDetail(nextLaunch, hasNext: false, hasPrev: false)))
+        launchIndexInDetail = index
+    }
 }
 
 // MARK: - View Actions
@@ -95,7 +124,7 @@ extension LaunchesViewController.ViewModel {
 
     func onAppear() {
         fetchAdditionalData()
-        eventBroker.listen(self.handleEvent(_:))
+        eventBroker.listen(.singleUse, self.handleEvent(_:))
     }
 
     func errorOkButtonTapped() {
@@ -111,5 +140,9 @@ extension LaunchesViewController.ViewModel {
         if isNearBottom {
             fetchAdditionalData()
         }
+    }
+
+    func selected(row: Int) {
+        launchIndexInDetail = row
     }
 }
