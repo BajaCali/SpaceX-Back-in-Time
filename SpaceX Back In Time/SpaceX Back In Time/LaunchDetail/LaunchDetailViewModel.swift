@@ -45,7 +45,9 @@ extension LaunchDetail.ViewModel {
     private func handleEvents(_ event: Event) {
         switch event {
         case let .detail(.updateLaunchInDetail(launch, hasNext: hasNext, hasPrev: hasPrev)):
-            self.launch = launch
+            withAnimation {
+                self.launch = launch
+            }
             return
         default: return
         }
