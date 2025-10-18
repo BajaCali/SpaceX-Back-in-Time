@@ -3,6 +3,7 @@ import Foundation
 // MARK: - Struct
 
 struct Launch {
+    let id: String
     let title: String
     var success: Bool
     var date: Date
@@ -68,30 +69,11 @@ extension Launch {
     }
 }
 
-// MARK: - Mocks
+// MARK: - Conformances
 
-extension Launch {
-    static var mockLaunches: [Launch] {
-        return [
-            Launch(
-                title: "Falcon 9 - Starlink Mission",
-                success: true,
-                date: .now,
-                flightNumber: 21,
-                details: "Detail of Falcon 9 Starling Mission",
-                rocketId: "",
-                capsulesIds: [],
-                payloadsIds: [],
-                launchpadId: "",
-                patch: nil,
-                reddit: nil,
-                flickr: nil,
-                presskitURL: nil,
-                youtubeURL: nil,
-                articleURL: nil,
-                wikipediaURL: nil
-            )
-        ]
+extension Launch: Equatable {
+    static func == (lhs: Launch, rhs: Launch) -> Bool {
+        lhs.id == rhs.id
     }
 }
 
@@ -132,6 +114,7 @@ extension Launch {
         let wikipediaURL = rawLaunch.links?.wikipedia.flatMap(URL.init)
 
         let launch = Launch(
+            id: rawLaunch.id,
             title: rawLaunch.name,
             success: rawLaunch.success ?? true,
             date: Date(timeIntervalSince1970: TimeInterval(rawLaunch.date_unix)),
@@ -157,5 +140,33 @@ extension Launch {
         }
 
         return launch
+    }
+}
+
+// MARK: - Mocks
+
+extension Launch {
+    static var mockLaunches: [Launch] {
+        return [
+            Launch(
+                id: "Mock",
+                title: "Falcon 9 - Starlink Mission",
+                success: true,
+                date: .now,
+                flightNumber: 21,
+                details: "Detail of Falcon 9 Starling Mission",
+                rocketId: "",
+                capsulesIds: [],
+                payloadsIds: [],
+                launchpadId: "",
+                patch: nil,
+                reddit: nil,
+                flickr: nil,
+                presskitURL: nil,
+                youtubeURL: nil,
+                articleURL: nil,
+                wikipediaURL: nil
+            )
+        ]
     }
 }

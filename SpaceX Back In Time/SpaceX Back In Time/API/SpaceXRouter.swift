@@ -59,6 +59,7 @@ extension SpaceXRouter: Endpoint {
                     "page": page,
                     "sort": ["flight_number": "descending"],
                     "select": [
+                        "id",
                         "name",
                         "details",
                         "success",
