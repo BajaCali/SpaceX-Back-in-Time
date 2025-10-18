@@ -5,8 +5,6 @@ import Dependencies
 
 struct LaunchDetail {
     @State private var viewModel: ViewModel
-//    @State private var hasNext: Bool
-//    @State private var hasPrev: Bool
 
     init(_ viewModel: ViewModel) {
         self.viewModel = viewModel
@@ -33,7 +31,11 @@ extension LaunchDetail: View {
         .onDisappear(perform: viewModel.onDisappear)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Next Launch", systemImage: "arrow.down.circle", action: viewModel.nextLaunchButtonTapped)
+                HStack {
+                    Button("Previous Launch", systemImage: "arrow.up", action: viewModel.prevLaunchButtonTapped)
+                        .font(.caption2)
+                    Button("Next Launch", systemImage: "arrow.down.circle", action: viewModel.nextLaunchButtonTapped)
+                }
             }
         }
     }
@@ -128,7 +130,7 @@ extension LaunchDetail {
     let launch = Launch.withImages
 
     NavigationStack {
-        LaunchDetail(.init(launch: launch))
+        LaunchDetail(.init(launch: launch, hasNext: false, hasPrev: false))
             .navigationTitle(launch.title)
     }
 }
