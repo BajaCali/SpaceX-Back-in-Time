@@ -6,6 +6,7 @@ import Dependencies
 extension LaunchesViewController {
     final class ViewModel {
         @Published var launches: [Launch]
+        @Published var searchText: String = ""
         @Published var state: State {
             didSet {
                 @Dependency(EventBroker.self) var eventBroker
@@ -14,6 +15,16 @@ extension LaunchesViewController {
         }
         @Published var errorMessage: String?
         @Published var showLoadingRow: Bool
+
+        var filteredLaunches: [Launch] {
+            if searchText.isEmpty {
+                return launches
+            } else {
+                return launches.filter {
+                    $0.title.localizedCaseInsensitiveContains(searchText)
+                }
+            }
+        }
 
         var pageInLoad: Int?
         var pagesAvailable: Int?
@@ -111,7 +122,8 @@ extension LaunchesViewController.ViewModel {
     }
 
     func rendering(row: Int) {
-        let isNearBottom = row >= (launches.count - 2)
+        guard searchText.isEmpty else { return }
+        let isNearBottom = row >= (filteredLaunches.count - 2)
         if isNearBottom {
             fetchAdditionalData()
         }
