@@ -55,7 +55,7 @@ extension LaunchesViewController.ViewModel {
         case .detail(.nextLaunchButtonTapped):
             guard
                 let launchInDetail,
-                let currentLaunchIndex = launches.firstIndex(where: { $0 == launchInDetail }),
+                let currentLaunchIndex = launches.firstIndex(of: launchInDetail),
                 currentLaunchIndex < (launches.endIndex - 1)
             else {
                 return
@@ -63,6 +63,14 @@ extension LaunchesViewController.ViewModel {
             sendNewLaunchToDetail(at: launches.index(after: currentLaunchIndex))
             return
         case .detail(.prevLaunchButtonTapped):
+            guard
+                let launchInDetail,
+                let currentLaunchIndex = launches.firstIndex(of: launchInDetail),
+                currentLaunchIndex > 1
+            else {
+                return
+            }
+            sendNewLaunchToDetail(at: launches.index(before: currentLaunchIndex))
             return
         case .detail(.dismissing):
             launchInDetail = nil
@@ -132,8 +140,13 @@ extension LaunchesViewController.ViewModel {
 // MARK: - VM -> View
 
 extension LaunchesViewController.ViewModel {
-    func generateDetailViewModel(for launch: Launch) -> LaunchDetail.ViewModel {
-        .init(launch: launch)
+    func generateDetailViewModel(for launch: Launch) -> LaunchDetail.ViewModel? {
+        guard let index = launches.firstIndex(of: launch) else { return nil }
+
+        let hasNext = index < (launches.count - 1)
+        let hasPrev = index > 0
+
+        return .init(launch: launch, hasNext: hasNext, hasPrev: hasPrev)
     }
 }
 

@@ -5,9 +5,13 @@ extension LaunchDetail {
     @Observable
     final class ViewModel {
         var launch: Launch
+        var hasNext: Bool
+        var hasPrev: Bool
 
-        init(launch: Launch) {
+        init(launch: Launch, hasNext: Bool, hasPrev: Bool) {
             self.launch = launch
+            self.hasNext = hasNext
+            self.hasPrev = hasPrev
         }
 
         @ObservationIgnored
@@ -20,6 +24,10 @@ extension LaunchDetail {
 extension LaunchDetail.ViewModel {
     func nextLaunchButtonTapped() {
         eventBroker.post(.detail(.nextLaunchButtonTapped))
+    }
+
+    func prevLaunchButtonTapped() {
+        eventBroker.post(.detail(.prevLaunchButtonTapped))
     }
 
     func onDisappear() {
