@@ -4,38 +4,19 @@ import Dependencies
 // MARK: - Struct
 
 struct LaunchDetail {
-    @State private var launch: Launch
+    @State private var viewModel: ViewModel
+//    @State private var hasNext: Bool
+//    @State private var hasPrev: Bool
 
-    init(_ launch: Launch) {
-        self.launch = launch
+    init(_ viewModel: ViewModel) {
+        self.viewModel = viewModel
     }
-
-    @Dependency(EventBroker.self) var eventBroker
 }
 
-// MARK: - Business Logic
+// MARK: - Derived Properites
 
 extension LaunchDetail {
-    private func nextLaunchButtonTapped() {
-        eventBroker.post(.detail(.nextLaunchButtonTapped))
-    }
-
-    private func onDisappear() {
-        eventBroker.post(.detail(.dismissing))
-    }
-
-    private func onAppear() {
-        eventBroker.listen(.reusing(via: "LauchDetail"), handleEvents(_:))
-    }
-
-    private func handleEvents(_ event: Event) {
-        switch event {
-        case let .detail(.updateLaunchInDetail(launch, hasNext: hasNext, hasPrev: hasPrev)):
-            self.launch = launch
-            return
-        default: return
-        }
-    }
+    var launch: Launch { viewModel.launch }
 }
 
 // MARK: - View
@@ -48,11 +29,11 @@ extension LaunchDetail: View {
             moreDetailsSection
             discussionsSection
         }
-        .onAppear(perform: onAppear)
-        .onDisappear(perform: onDisappear)
+        .onAppear(perform: viewModel.onAppear)
+        .onDisappear(perform: viewModel.onDisappear)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Next Launch", systemImage: "arrow.down.circle", action: nextLaunchButtonTapped)
+                Button("Next Launch", systemImage: "arrow.down.circle", action: viewModel.nextLaunchButtonTapped)
             }
         }
     }
@@ -147,7 +128,7 @@ extension LaunchDetail {
     let launch = Launch.withImages
 
     NavigationStack {
-        LaunchDetail(launch)
+        LaunchDetail(.init(launch: launch))
             .navigationTitle(launch.title)
     }
 }

@@ -160,9 +160,11 @@ extension LaunchesViewController {
     }
 
     private func pushDetail(for launch: Launch) {
-        let detailController = UIHostingController(rootView: LaunchDetail(launch))
+        let detailViewModel = viewModel.generateDetailViewModel(for: launch)
+        let detailController = UIHostingController(rootView: LaunchDetail(detailViewModel))
         detailController.title = launch.title
         navigationController?.pushViewController(detailController, animated: true)
+        viewModel.detailPushed(with: launch)
     }
 }
 
@@ -197,7 +199,6 @@ extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let selectedLaunch = viewModel.launches[indexPath.row]
-        viewModel.selected(row: indexPath.row)
         pushDetail(for: selectedLaunch)
     }
 

@@ -1,6 +1,7 @@
 import Foundation
 
 struct LaunchRaw: Decodable {
+    let id: String
     let name: String
     let details: String?
     let success: Bool?

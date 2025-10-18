@@ -15,7 +15,7 @@ extension LaunchesViewController {
         @Published var errorMessage: String?
         @Published var showLoadingRow: Bool
 
-        var launchIndexInDetail: Int?
+        var launchInDetail: Launch?
 
         init() {
             self.launches = .init()
@@ -42,18 +42,18 @@ extension LaunchesViewController.ViewModel {
 
         case .detail(.nextLaunchButtonTapped):
             guard
-                let currentLaunchIndex = launchIndexInDetail,
+                let launchInDetail,
+                let currentLaunchIndex = launches.firstIndex(where: { $0 == launchInDetail }),
                 currentLaunchIndex < (launches.endIndex - 1)
             else {
                 return
             }
-            sendNewLaunchToDetail(at: currentLaunchIndex + 1)
-
+            sendNewLaunchToDetail(at: launches.index(after: currentLaunchIndex))
             return
         case .detail(.prevLaunchButtonTapped):
             return
         case .detail(.dismissing):
-            launchIndexInDetail = nil
+            launchInDetail = nil
         case .detail: return
 
         case .background(.tryAgainButtonTapped):
@@ -79,7 +79,7 @@ extension LaunchesViewController.ViewModel {
         Task(priority: .userInitiated) {
             do {
                 let launches: LaunchesRaw = try await launchesFetcher.getLaunchesPage(page)
-//                let launches: LaunchesRaw = try await LaunchesFetcher.previewValue.getLaunchesPage(1)
+                //                let launches: LaunchesRaw = try await LaunchesFetcher.previewValue.getLaunchesPage(1)
                 dataFetched(.success(launches))
             } catch {
                 guard let apiError = error as? APIError else { return }
@@ -110,7 +110,15 @@ extension LaunchesViewController.ViewModel {
     private func sendNewLaunchToDetail(at index: Int) {
         let nextLaunch = launches[index]
         eventBroker.post(.detail(.updateLaunchInDetail(nextLaunch, hasNext: false, hasPrev: false)))
-        launchIndexInDetail = index
+        launchInDetail = nextLaunch
+    }
+}
+
+// MARK: - VM -> View
+
+extension LaunchesViewController.ViewModel {
+    func generateDetailViewModel(for launch: Launch) -> LaunchDetail.ViewModel {
+        .init(launch: launch)
     }
 }
 
@@ -142,7 +150,7 @@ extension LaunchesViewController.ViewModel {
         }
     }
 
-    func selected(row: Int) {
-        launchIndexInDetail = row
+    func detailPushed(with launch: Launch) {
+        self.launchInDetail = launch
     }
 }

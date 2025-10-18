@@ -6,6 +6,7 @@ import Foundation
 extension Launch {
     static var withImages: Launch {
         Launch(
+            id: "CSG-2",
             title: "CSG-2",
             success: true,
             date: .now,
