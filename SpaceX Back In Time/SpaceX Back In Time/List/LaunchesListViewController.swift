@@ -67,7 +67,7 @@ extension LaunchesViewController {
     }
 
     private func addToolbarButton() {
-        let testButtonVC = UIHostingController(rootView: ToolbarButton(action: viewModel.testButtonTapped))
+        let testButtonVC = UIHostingController(rootView: ToolbarButton(action: { }))
         let barButton = UIBarButtonItem(customView: testButtonVC.view)
         testButtonVC.view.backgroundColor = .clear
         self.navigationItem.rightBarButtonItem = barButton
@@ -200,7 +200,7 @@ extension LaunchesViewController: UISearchResultsUpdating {
 
 extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        viewModel.filteredLaunches.count + (viewModel.showLoadingRow ? 1 : 0)
+        viewModel.filteredLaunches.count + (viewModel.state == .loadingMore ? 1 : 0)
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

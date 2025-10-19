@@ -1,7 +1,7 @@
 import Foundation
 
 extension LaunchesViewController.ViewModel {
-    enum State {
+    enum State: Equatable {
         case initial
         case loading
         case loadingMore
