@@ -29,12 +29,6 @@ extension LaunchesViewController {
         var totalLaunches: Int?
 
         @Published var launchInDetail: Launch?
-        var canLoadMore: Bool {
-            let value = totalLaunches.flatMap({ launches.count < $0 }) ?? true
-
-            return value
-        }
-
         init() {
             self.launches = .init()
         }
@@ -141,6 +135,12 @@ extension LaunchesViewController.ViewModel {
 
     // MARK: Other
 
+    var canLoadMore: Bool {
+        let value = totalLaunches.flatMap({ launches.count < $0 }) ?? true
+
+        return value
+    }
+
     private func sendNewLaunchToDetail(at index: Int) {
         let newLaunch = launches[index]
         if let newDetailState = generateDetailState(for: newLaunch) {
@@ -163,7 +163,7 @@ extension LaunchesViewController.ViewModel {
                     updateState(to: .noSearchResults(searchText))
                 }
             }
-        case (true, true), (false, false): return
+        case (true, true): return
         }
     }
 
