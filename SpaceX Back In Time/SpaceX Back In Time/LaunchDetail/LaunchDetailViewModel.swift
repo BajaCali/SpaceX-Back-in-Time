@@ -4,6 +4,25 @@ import Dependencies
 extension LaunchDetailView {
     @Observable
     final class ViewModel {
+        var state: ViewModel.State
+
+        init(_ state: ViewModel.State) {
+            self.state = state
+        }
+
+        init(launch: Launch, hasNext: Bool, hasPrev: Bool) {
+            self.state = .init(launch: launch, hasNext: hasNext, hasPrev: hasPrev)
+        }
+
+        @ObservationIgnored
+        @Dependency(EventBroker.self) var eventBroker
+    }
+}
+
+// MARK: - State
+
+extension LaunchDetailView.ViewModel {
+    struct State: Equatable {
         var launch: Launch
         var hasNext: Bool
         var hasPrev: Bool
@@ -13,9 +32,6 @@ extension LaunchDetailView {
             self.hasNext = hasNext
             self.hasPrev = hasPrev
         }
-
-        @ObservationIgnored
-        @Dependency(EventBroker.self) var eventBroker
     }
 }
 
@@ -44,9 +60,9 @@ extension LaunchDetailView.ViewModel {
 extension LaunchDetailView.ViewModel {
     private func handleEvents(_ event: Event) {
         switch event {
-        case let .detail(.updateLaunchInDetail(launch, hasNext: hasNext, hasPrev: hasPrev)):
+        case let .detail(.updateLaunchInDetail(state)):
             withAnimation {
-                self.launch = launch
+                self.state = state
             }
             return
         default: return

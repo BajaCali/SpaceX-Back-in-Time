@@ -177,11 +177,11 @@ extension LaunchesViewController {
     }
 
     private func pushDetail(for launch: Launch) {
-        guard let detailViewModel = viewModel
-            .generateDetailViewModel(for: launch) else {
+        guard let detailState = viewModel
+            .generateDetailState(for: launch) else {
             return
         }
-        let detailController = UIHostingController(rootView: LaunchDetailView(detailViewModel))
+        let detailController = UIHostingController(rootView: LaunchDetailView(.init(detailState)))
         detailController.title = launch.title
         navigationController?.pushViewController(detailController, animated: true)
         viewModel.detailPushed(with: launch)

@@ -131,16 +131,18 @@ extension LaunchesViewController.ViewModel {
     // MARK: Other
 
     private func sendNewLaunchToDetail(at index: Int) {
-        let nextLaunch = launches[index]
-        eventBroker.post(.detail(.updateLaunchInDetail(nextLaunch, hasNext: false, hasPrev: false)))
-        launchInDetail = nextLaunch
+        let newLaunch = launches[index]
+        if let newDetailState = generateDetailState(for: newLaunch) {
+            eventBroker.post(.detail(.updateLaunchInDetail(newDetailState)))
+            launchInDetail = newLaunch
+        }
     }
 }
 
 // MARK: - VM -> View
 
 extension LaunchesViewController.ViewModel {
-    func generateDetailViewModel(for launch: Launch) -> LaunchDetailView.ViewModel? {
+    func generateDetailState(for launch: Launch) -> LaunchDetailView.ViewModel.State? {
         guard let index = launches.firstIndex(of: launch) else { return nil }
 
         let hasNext = index < (launches.count - 1)

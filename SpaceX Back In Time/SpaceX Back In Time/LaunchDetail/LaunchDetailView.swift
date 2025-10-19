@@ -14,7 +14,8 @@ struct LaunchDetailView {
 // MARK: - Derived Properites
 
 extension LaunchDetailView {
-    var launch: Launch { viewModel.launch }
+    var state: ViewModel.State { viewModel.state }
+    var launch: Launch { state.launch }
 }
 
 // MARK: - View

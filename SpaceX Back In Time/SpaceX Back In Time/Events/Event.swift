@@ -16,6 +16,6 @@ enum Event {
         case dismissing
         case nextLaunchButtonTapped
         case prevLaunchButtonTapped
-        case updateLaunchInDetail(Launch, hasNext: Bool, hasPrev: Bool)
+        case updateLaunchInDetail(LaunchDetailView.ViewModel.State)
     }
 }
