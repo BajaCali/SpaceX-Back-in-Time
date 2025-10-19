@@ -57,6 +57,16 @@ extension LaunchesViewController {
     private func setupNavigationBar() {
         self.title = "Rocket Launches 🚀"
         addToolbarButton()
+        addSearchBar()
+    }
+
+    private func addSearchBar() {
+        let searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Search Launches"
+        navigationItem.searchController = searchController
+        definesPresentationContext = true
     }
 
     private func addToolbarButton() {
@@ -88,6 +98,13 @@ extension LaunchesViewController {
 extension LaunchesViewController {
     private func bindViewModelUpdates() {
         viewModel.$launches
+            .debounce(for: 0.1, scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refreshTableView()
+            }
+            .store(in: &bindings)
+
+        viewModel.$searchText
             .debounce(for: 0.1, scheduler: RunLoop.main)
             .sink { [weak self] _ in
                 self?.refreshTableView()
@@ -163,17 +180,25 @@ extension LaunchesViewController {
     }
 }
 
+// MARK: - Search
+
+extension LaunchesViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        viewModel.searchText = searchController.searchBar.text ?? ""
+    }
+}
+
 // MARK: - TableView
 
 extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        viewModel.launches.count + (viewModel.showLoadingRow ? 1 : 0)
+        viewModel.filteredLaunches.count + (viewModel.showLoadingRow ? 1 : 0)
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         viewModel.rendering(row: indexPath.row)
 
-        if indexPath.row < viewModel.launches.count {
+        if indexPath.row < viewModel.filteredLaunches.count {
             return launchCell(indexPath: indexPath)
         }
 
@@ -185,7 +210,7 @@ extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
 
     private func launchCell(indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: CellId.launch.rawValue, for: indexPath)
-        let launch = viewModel.launches[indexPath.row]
+        let launch = viewModel.filteredLaunches[indexPath.row]
         cell.contentConfiguration = UIHostingConfiguration { RowView(launch: launch) }
         cell.accessoryType = .disclosureIndicator
         return cell
@@ -193,7 +218,7 @@ extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let selectedLaunch = viewModel.launches[indexPath.row]
+        let selectedLaunch = viewModel.filteredLaunches[indexPath.row]
         viewModel.launchTapped(selectedLaunch)
     }
 

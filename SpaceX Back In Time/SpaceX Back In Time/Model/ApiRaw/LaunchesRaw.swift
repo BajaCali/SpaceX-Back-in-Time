@@ -2,8 +2,7 @@ import Foundation
 
 struct LaunchesRaw: Decodable {
     var docs: [LaunchRaw]
-    var page: Int
-    var totalPages: Int
+    var totalDocs: Int
 }
 
 // MARK: - Raw -> App

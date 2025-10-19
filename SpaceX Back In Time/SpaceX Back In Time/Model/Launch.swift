@@ -9,6 +9,14 @@ struct Launch {
     var flightNumber: Int
 }
 
+// MARK: - Fitler
+
+extension Launch {
+    func match(by searchText: String) -> Bool {
+        Filter(launch: self, searchText: searchText)()
+    }
+}
+
 // MARK: - Mocks
 
 extension Launch {
