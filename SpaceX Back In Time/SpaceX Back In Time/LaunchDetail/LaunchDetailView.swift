@@ -30,13 +30,34 @@ extension LaunchDetailView: View {
         }
         .onAppear(perform: viewModel.onAppear)
         .onDisappear(perform: viewModel.onDisappear)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+        .toolbar(content: toolbar)
+    }
+}
+
+// MARK: - View Components
+
+extension LaunchDetailView {
+    func toolbar() -> some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
+            if state.hasPrev || state.hasNext {
                 HStack {
-                    Button("Previous Launch", systemImage: "arrow.up", action: viewModel.prevLaunchButtonTapped)
-                        .font(.caption2)
-                    Button("Next Launch", systemImage: "arrow.down.circle", action: viewModel.nextLaunchButtonTapped)
+                    Button(
+                        "Previous Launch",
+                        systemImage: "arrow.up",
+                        action: viewModel.prevLaunchButtonTapped
+                    )
+                    .transition(.scale)
+                    .font(.caption2)
+                    .optionallyHidden(state.hasPrev == false)
+
+                    Button(
+                        "Next Launch",
+                        systemImage: "arrow.down.circle",
+                        action: viewModel.nextLaunchButtonTapped
+                    )
+                    .optionallyHidden(state.hasNext == false)
                 }
+                .tint(.primary)
             }
         }
     }
@@ -131,7 +152,7 @@ extension LaunchDetailView {
     let launch = Launch.withImages
 
     NavigationStack {
-        LaunchDetailView(.init(launch: launch, hasNext: false, hasPrev: false))
+        LaunchDetailView(.init(launch: launch, hasNext: false, hasPrev: true))
             .navigationTitle(launch.title)
     }
 }

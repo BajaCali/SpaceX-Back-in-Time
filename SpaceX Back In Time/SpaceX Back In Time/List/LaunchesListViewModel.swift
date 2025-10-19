@@ -66,7 +66,7 @@ extension LaunchesViewController.ViewModel {
             guard
                 let launchInDetail,
                 let currentLaunchIndex = launches.firstIndex(of: launchInDetail),
-                currentLaunchIndex > 1
+                currentLaunchIndex >= 1
             else {
                 return
             }
