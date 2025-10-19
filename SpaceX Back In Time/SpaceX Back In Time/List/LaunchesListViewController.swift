@@ -226,12 +226,9 @@ extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-
         let selectedLaunch = viewModel.filteredLaunches[indexPath.row]
-        viewModel.launchTapped(selectedLaunch)
-        viewModel.selected(row: indexPath.row)
-
         pushDetail(for: selectedLaunch)
+        viewModel.detailPushed(with: selectedLaunch)
     }
 
     private func refreshTableView() {
