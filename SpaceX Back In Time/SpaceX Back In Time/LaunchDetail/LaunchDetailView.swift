@@ -28,6 +28,7 @@ extension LaunchDetailView: View {
             moreDetailsSection
             discussionsSection
         }
+        .id(launch.id)
         .onAppear(perform: viewModel.onAppear)
         .onDisappear(perform: viewModel.onDisappear)
         .toolbar(content: toolbar)
