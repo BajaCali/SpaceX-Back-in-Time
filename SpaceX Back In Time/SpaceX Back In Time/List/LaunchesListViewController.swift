@@ -68,10 +68,16 @@ extension LaunchesViewController {
     }
 
     private func addToolbarButton() {
-        let testButtonVC = UIHostingController(rootView: ToolbarButton(action: { }))
-        let barButton = UIBarButtonItem(customView: testButtonVC.view)
-        testButtonVC.view.backgroundColor = .clear
-        self.navigationItem.rightBarButtonItem = barButton
+        let sortIcon = UIImage(systemName: "arrow.up.arrow.down.circle")
+
+        let sortButton = UIBarButtonItem(
+            image: sortIcon,
+            style: .plain,
+            target: self,
+            action: #selector(showActionSheet(_:))
+        )
+
+        self.navigationItem.rightBarButtonItem = sortButton
     }
 
     private func attachDelegates() {
@@ -147,6 +153,27 @@ extension LaunchesViewController {
                 }
             }
         }
+    }
+
+    @objc private func showActionSheet(_ sender: UIBarButtonItem) {
+        let actionSheet = UIAlertController(
+            title: "Order by",
+            message: "Select a field to which to order.\nSelect again to reverse.",
+            preferredStyle: .actionSheet
+        )
+
+        let byName = UIAlertAction(title: "Name", style: .default) { _ in
+        }
+
+        let byDate = UIAlertAction(title: "Date", style: .default) { _ in
+        }
+
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in }
+
+        actionSheet.addAction(byName)
+        actionSheet.addAction(byDate)
+        actionSheet.addAction(cancelAction)
+        self.present(actionSheet, animated: true)
     }
 
     private func showErrorMessageAlert(_ message: String) {
