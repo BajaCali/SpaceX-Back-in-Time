@@ -5,6 +5,7 @@ import Combine
 class LaunchesViewController: UIViewController {
     private let tableView = UITableView()
     private let backgroundView = UIView()
+    private var detailViewController: UIHostingController<LaunchDetailView>?
 
     private var viewModel = ViewModel()
 
@@ -115,15 +116,18 @@ extension LaunchesViewController {
             }
             .store(in: &bindings)
 
-        viewModel.$showLoadingRow
-            .sink { [weak self] _ in
+        viewModel.$state
+            .sink { [weak self] state in
+                self?.setScrolling(basedOn: state)
                 self?.refreshTableView()
             }
             .store(in: &bindings)
 
-        viewModel.$state
-            .sink { [weak self] state in
-                self?.setScrolling(basedOn: state)
+        viewModel.$launchInDetail
+            .sink { [weak self] launch in
+                launch.flatMap {
+                    self?.updateDetailsTitle(of: $0)
+                }
             }
             .store(in: &bindings)
     }
@@ -184,7 +188,12 @@ extension LaunchesViewController {
         let detailController = UIHostingController(rootView: LaunchDetailView(.init(detailState)))
         detailController.title = launch.title
         navigationController?.pushViewController(detailController, animated: true)
+        self.detailViewController = detailController
         viewModel.detailPushed(with: launch)
+    }
+
+    private func updateDetailsTitle(of launch: Launch) {
+        detailViewController?.title = launch.title
     }
 }
 

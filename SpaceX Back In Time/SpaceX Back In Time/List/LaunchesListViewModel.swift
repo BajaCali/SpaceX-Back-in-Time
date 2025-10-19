@@ -24,7 +24,7 @@ extension LaunchesViewController {
         private let privateState: Mutex<State> = .init(.initial)
         var totalLaunches: Int?
 
-        var launchInDetail: Launch?
+        @Published var launchInDetail: Launch?
 
         init() {
             self.launches = .init()
