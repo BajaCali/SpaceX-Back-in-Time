@@ -7,7 +7,11 @@ import Synchronization
 extension LaunchesViewController {
     final class ViewModel {
         @Published var launches: [Launch]
-        @Published var searchText: String = ""
+        @Published var searchText: String = "" {
+            didSet {
+                searchTextUpdated(oldValue: oldValue)
+            }
+        }
         @Published var state: State = .initial {
             didSet {
                 @Dependency(EventBroker.self) var eventBroker
@@ -25,6 +29,11 @@ extension LaunchesViewController {
         var totalLaunches: Int?
 
         @Published var launchInDetail: Launch?
+        var canLoadMore: Bool {
+            let value = totalLaunches.flatMap({ launches.count < $0 }) ?? true
+
+            return value
+        }
 
         init() {
             self.launches = .init()
@@ -137,6 +146,20 @@ extension LaunchesViewController.ViewModel {
         if let newDetailState = generateDetailState(for: newLaunch) {
             eventBroker.post(.detail(.updateLaunchInDetail(newDetailState)))
             launchInDetail = newLaunch
+        }
+    }
+
+    private func searchTextUpdated(oldValue: String) {
+        switch (oldValue.isEmpty, searchText.isEmpty) {
+        case (true, true), (false, false): return
+        case (false, true):
+            if privateState.equals(.loadingMore) && filteredLaunches.isEmpty {
+                updateState(to: .loading)
+            }
+        case (true, false):
+            if privateState.equals(.loaded) && filteredLaunches.isNotEmpty {
+                fetchAdditionalData()
+            }
         }
     }
 
