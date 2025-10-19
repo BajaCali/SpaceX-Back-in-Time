@@ -8,6 +8,7 @@ extension LaunchesViewController.ViewModel {
         case networkIssue(String)
         case loadingMoreFailed
         case loaded
+        case noSearchResults(String)
     }
 }
 

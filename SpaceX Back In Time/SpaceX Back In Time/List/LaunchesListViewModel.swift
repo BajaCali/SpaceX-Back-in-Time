@@ -126,7 +126,7 @@ extension LaunchesViewController.ViewModel {
                 // cant search more & search failed
             case (true, false):
                 // TODO: Introduce new state - no search results
-                updateState(to: .loaded)
+                updateState(to: .noSearchResults(searchText))
             }
 
         case let .failure(apiError):
@@ -151,15 +151,19 @@ extension LaunchesViewController.ViewModel {
 
     private func searchTextUpdated(oldValue: String) {
         switch (oldValue.isEmpty, searchText.isEmpty) {
-        case (true, true), (false, false): return
         case (false, true):
             if privateState.equals(.loadingMore) && filteredLaunches.isEmpty {
                 updateState(to: .loading)
             }
-        case (true, false):
-            if privateState.equals(.loaded) && filteredLaunches.isNotEmpty {
-                fetchAdditionalData()
+        case (_, false):
+            if privateState.equals(.loaded) && filteredLaunches.isEmpty {
+                if canLoadMore {
+                    fetchAdditionalData()
+                } else {
+                    updateState(to: .noSearchResults(searchText))
+                }
             }
+        case (true, true), (false, false): return
         }
     }
 

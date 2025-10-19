@@ -48,7 +48,17 @@ extension BackgroundView: View {
             loadingView
         case let .networkIssue(issue):
             networkErrorView(errorDescription: issue)
+        case let .noSearchResults(searchText):
+            noSearchResults(searchText)
         }
+    }
+
+    func noSearchResults(_ searchText: String) -> some View {
+        ContentUnavailableView(
+            "No Launches found.",
+            systemImage: "magnifyingglass",
+            description: Text("No results found for\"\(searchText)\"")
+        )
     }
 
     func networkErrorView(errorDescription: String) -> some View {

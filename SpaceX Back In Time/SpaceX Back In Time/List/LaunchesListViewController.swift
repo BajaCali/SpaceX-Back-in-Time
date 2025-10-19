@@ -142,7 +142,7 @@ extension LaunchesViewController {
                 switch state {
                 case .initial, .loading, .networkIssue:
                     tableView.isScrollEnabled = false
-                case .loadingMore, .loadingMoreFailed, .loaded:
+                case .loadingMore, .loadingMoreFailed, .loaded, .noSearchResults:
                     tableView.isScrollEnabled = true
                 }
             }
