@@ -140,7 +140,7 @@ extension LaunchesViewController.ViewModel {
 // MARK: - VM -> View
 
 extension LaunchesViewController.ViewModel {
-    func generateDetailViewModel(for launch: Launch) -> LaunchDetail.ViewModel? {
+    func generateDetailViewModel(for launch: Launch) -> LaunchDetailView.ViewModel? {
         guard let index = launches.firstIndex(of: launch) else { return nil }
 
         let hasNext = index < (launches.count - 1)

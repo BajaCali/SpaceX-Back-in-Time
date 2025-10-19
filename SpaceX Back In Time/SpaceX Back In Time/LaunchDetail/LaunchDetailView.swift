@@ -3,7 +3,7 @@ import Dependencies
 
 // MARK: - Struct
 
-struct LaunchDetail {
+struct LaunchDetailView {
     @State private var viewModel: ViewModel
 
     init(_ viewModel: ViewModel) {
@@ -13,13 +13,13 @@ struct LaunchDetail {
 
 // MARK: - Derived Properites
 
-extension LaunchDetail {
+extension LaunchDetailView {
     var launch: Launch { viewModel.launch }
 }
 
 // MARK: - View
 
-extension LaunchDetail: View {
+extension LaunchDetailView: View {
     var body: some View {
         List {
             images
@@ -43,7 +43,7 @@ extension LaunchDetail: View {
 
 // MARK: - Sections
 
-extension LaunchDetail {
+extension LaunchDetailView {
     var images: some View {
         ImagesView(
             patch: launch.patch?.large,
@@ -130,7 +130,7 @@ extension LaunchDetail {
     let launch = Launch.withImages
 
     NavigationStack {
-        LaunchDetail(.init(launch: launch, hasNext: false, hasPrev: false))
+        LaunchDetailView(.init(launch: launch, hasNext: false, hasPrev: false))
             .navigationTitle(launch.title)
     }
 }

@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - Struct
 
-extension LaunchDetail {
+extension LaunchDetailView {
     struct ImagesView {
         let patch: URL?
         let images: [URL]
@@ -14,7 +14,7 @@ extension LaunchDetail {
 
 // MARK: - Business Logic
 
-extension LaunchDetail.ImagesView {
+extension LaunchDetailView.ImagesView {
     func scrollToFirstPhotoButtonTapped() {
         if let image = self.images.first {
             withAnimation(.bouncy) {
@@ -26,7 +26,7 @@ extension LaunchDetail.ImagesView {
 
 // MARK: - View
 
-extension LaunchDetail.ImagesView: View {
+extension LaunchDetailView.ImagesView: View {
     var body: some View {
         if let patch {
             ScrollViewReader { proxy in
@@ -54,7 +54,7 @@ extension LaunchDetail.ImagesView: View {
 
 // MARK: - Parts
 
-extension LaunchDetail.ImagesView {
+extension LaunchDetailView.ImagesView {
     @ViewBuilder
     var slideToFirstImageButton: some View {
         if images.isNotEmpty && showImagesButtonNotYetTapped {

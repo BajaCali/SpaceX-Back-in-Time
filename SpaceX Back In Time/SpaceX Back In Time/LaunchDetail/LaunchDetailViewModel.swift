@@ -1,7 +1,7 @@
 import SwiftUI
 import Dependencies
 
-extension LaunchDetail {
+extension LaunchDetailView {
     @Observable
     final class ViewModel {
         var launch: Launch
@@ -21,7 +21,7 @@ extension LaunchDetail {
 
 // MARK: - View Actions
 
-extension LaunchDetail.ViewModel {
+extension LaunchDetailView.ViewModel {
     func nextLaunchButtonTapped() {
         eventBroker.post(.detail(.nextLaunchButtonTapped))
     }
@@ -41,7 +41,7 @@ extension LaunchDetail.ViewModel {
 
 // MARK: - Functional
 
-extension LaunchDetail.ViewModel {
+extension LaunchDetailView.ViewModel {
     private func handleEvents(_ event: Event) {
         switch event {
         case let .detail(.updateLaunchInDetail(launch, hasNext: hasNext, hasPrev: hasPrev)):
