@@ -57,10 +57,10 @@ extension LaunchesViewController {
     private func setupNavigationBar() {
         self.title = "Rocket Launches 🚀"
         addToolbarButton()
-        addSearch()
+        addSearchBar()
     }
 
-    private func addSearch() {
+    private func addSearchBar() {
         let searchController = UISearchController(searchResultsController: nil)
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
