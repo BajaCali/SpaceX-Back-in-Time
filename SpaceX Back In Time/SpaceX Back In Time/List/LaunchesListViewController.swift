@@ -5,6 +5,7 @@ import Combine
 class LaunchesViewController: UIViewController {
     private let tableView = UITableView()
     private let backgroundView = UIView()
+    private var detailViewController: UIHostingController<LaunchDetailView>?
 
     private var viewModel = ViewModel()
 
@@ -27,9 +28,6 @@ extension LaunchesViewController {
         super.viewDidLoad()
         setupUI()
         bindViewModelUpdates()
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
         viewModel.onAppear()
     }
 }
@@ -70,7 +68,7 @@ extension LaunchesViewController {
     }
 
     private func addToolbarButton() {
-        let testButtonVC = UIHostingController(rootView: ToolbarButton(action: viewModel.testButtonTapped))
+        let testButtonVC = UIHostingController(rootView: ToolbarButton(action: { }))
         let barButton = UIBarButtonItem(customView: testButtonVC.view)
         testButtonVC.view.backgroundColor = .clear
         self.navigationItem.rightBarButtonItem = barButton
@@ -118,15 +116,18 @@ extension LaunchesViewController {
             }
             .store(in: &bindings)
 
-        viewModel.$showLoadingRow
-            .sink { [weak self] _ in
+        viewModel.$state
+            .sink { [weak self] state in
+                self?.setScrolling(basedOn: state)
                 self?.refreshTableView()
             }
             .store(in: &bindings)
 
-        viewModel.$state
-            .sink { [weak self] state in
-                self?.setScrolling(basedOn: state)
+        viewModel.$launchInDetail
+            .sink { [weak self] launch in
+                launch.flatMap {
+                    self?.updateDetailsTitle(of: $0)
+                }
             }
             .store(in: &bindings)
     }
@@ -135,20 +136,20 @@ extension LaunchesViewController {
 // MARK: - View Updates
 
 extension LaunchesViewController {
-    func setScrolling(basedOn state: ViewModel.State) {
+    private func setScrolling(basedOn state: ViewModel.State) {
         Task {
             await MainActor.run {
                 switch state {
                 case .initial, .loading, .networkIssue:
                     tableView.isScrollEnabled = false
-                case .loadingMore, .loadingMoreFailed, .loaded:
+                case .loadingMore, .loadingMoreFailed, .loaded, .noSearchResults:
                     tableView.isScrollEnabled = true
                 }
             }
         }
     }
 
-    func showErrorMessageAlert(_ message: String) {
+    private func showErrorMessageAlert(_ message: String) {
         Task {
             await MainActor.run {
                 let confirmAction = UIAlertAction(
@@ -178,6 +179,22 @@ extension LaunchesViewController {
             }
         }
     }
+
+    private func pushDetail(for launch: Launch) {
+        guard let detailState = viewModel
+            .generateDetailState(for: launch) else {
+            return
+        }
+        let detailController = UIHostingController(rootView: LaunchDetailView(.init(detailState)))
+        detailController.title = launch.title
+        navigationController?.pushViewController(detailController, animated: true)
+        self.detailViewController = detailController
+        viewModel.detailPushed(with: launch)
+    }
+
+    private func updateDetailsTitle(of launch: Launch) {
+        detailViewController?.title = launch.title
+    }
 }
 
 // MARK: - Search
@@ -192,7 +209,7 @@ extension LaunchesViewController: UISearchResultsUpdating {
 
 extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        viewModel.filteredLaunches.count + (viewModel.showLoadingRow ? 1 : 0)
+        viewModel.filteredLaunches.count + (viewModel.state == .loadingMore ? 1 : 0)
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -219,7 +236,8 @@ extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let selectedLaunch = viewModel.filteredLaunches[indexPath.row]
-        viewModel.launchTapped(selectedLaunch)
+        pushDetail(for: selectedLaunch)
+        viewModel.detailPushed(with: selectedLaunch)
     }
 
     private func refreshTableView() {

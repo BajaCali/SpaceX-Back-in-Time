@@ -4,7 +4,7 @@ struct RowView: View {
     let launch: Launch
 
     var singleLineText: String {
-        return if launch.isFavourite {
+        return if launch.success {
             "⭐️ \(launch.title)"
         } else {
             launch.title

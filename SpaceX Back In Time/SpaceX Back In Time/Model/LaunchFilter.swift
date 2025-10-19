@@ -29,7 +29,8 @@ extension Launch.Filter {
 
     func match() -> Bool {
         searchTitle() ||
-        searchDate()
+        searchDate() ||
+        searchDetails()
     }
 }
 
@@ -81,5 +82,14 @@ extension Launch.Filter {
         searchMonths.contains { searchMonth in
             searchMonth == calendar.component(.month, from: launch.date)
         }
+    }
+
+    private func searchDetails() -> Bool {
+        guard let details = launch.details else { return false }
+        return self.searchComponents
+            .filter { $0.count > 3}
+            .contains { component in
+                details.localizedCaseInsensitiveContains(component)
+            }
     }
 }
