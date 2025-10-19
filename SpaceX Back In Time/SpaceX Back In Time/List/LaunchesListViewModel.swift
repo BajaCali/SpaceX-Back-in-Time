@@ -20,13 +20,8 @@ extension LaunchesViewController {
         @Published var showLoadingRow: Bool
 
         var filteredLaunches: [Launch] {
-            if searchText.isEmpty {
-                return launches
-            } else {
-                return launches.filter {
-                    $0.title.localizedCaseInsensitiveContains(searchText)
-                }
-            }
+            guard searchText.isNotEmpty else { return launches }
+            return launches.filter { $0.match(by: searchText) }
         }
 
         let isLoading: Mutex<Bool> = .init(false)
