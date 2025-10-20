@@ -64,7 +64,6 @@ extension LaunchDetailView.ImagesView {
             ) {
                 scrollToFirstPhotoButtonTapped()
                 showImagesButtonNotYetTapped.toggle()
-                print("Button tapped")
             }
             .buttonStyle(.borderless)
             .transition(.symbolEffect.animation(.default.speed(0.7)))

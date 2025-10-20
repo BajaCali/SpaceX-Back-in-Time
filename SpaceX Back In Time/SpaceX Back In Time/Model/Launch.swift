@@ -104,10 +104,6 @@ extension Launch {
             )
         }
 
-        if flickr?.original.isNotEmpty ?? false {
-            print("\(rawLaunch.name) has images")
-        }
-
         let presskitURL = rawLaunch.links?.presskit.flatMap(URL.init)
         let youtubeURL = rawLaunch.links?.youtube_id.flatMap { URL(string: "https://www.youtube.com/watch?v=\($0)") }
         let articleURL = rawLaunch.links?.article.flatMap(URL.init)
@@ -134,9 +130,9 @@ extension Launch {
         )
 
         if launch.flickr?.original.isNotEmpty ?? false {
-            print(launch)
-            dump(launch)
-            debugPrint(launch)
+//            print(launch)
+//            dump(launch)
+//            debugPrint(launch)
         }
 
         return launch

@@ -123,7 +123,6 @@ extension LaunchesViewController.ViewModel {
                 updateState(to: .loading)
                 // cant search more & search failed
             case (true, false):
-                // TODO: Introduce new state - no search results
                 updateState(to: .noSearchResults(searchText))
             }
 
