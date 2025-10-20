@@ -129,12 +129,6 @@ extension Launch {
             wikipediaURL: wikipediaURL
         )
 
-        if launch.flickr?.original.isNotEmpty ?? false {
-//            print(launch)
-//            dump(launch)
-//            debugPrint(launch)
-        }
-
         return launch
     }
 }

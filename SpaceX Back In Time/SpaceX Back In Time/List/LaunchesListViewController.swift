@@ -202,7 +202,7 @@ Currently sorted \(viewModel.ordering.humanDescription).
             }
         }
 
-        let title = checkmark + newOrdering.humanDescription // ordering.field.description + direction.description
+        let title = checkmark + newOrdering.humanDescription
         return (title, newOrdering)
 
     }
