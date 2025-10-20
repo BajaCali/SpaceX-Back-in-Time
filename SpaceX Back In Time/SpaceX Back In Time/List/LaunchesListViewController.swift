@@ -68,10 +68,16 @@ extension LaunchesViewController {
     }
 
     private func addToolbarButton() {
-        let testButtonVC = UIHostingController(rootView: ToolbarButton(action: { }))
-        let barButton = UIBarButtonItem(customView: testButtonVC.view)
-        testButtonVC.view.backgroundColor = .clear
-        self.navigationItem.rightBarButtonItem = barButton
+        let sortIcon = UIImage(systemName: "arrow.up.arrow.down.circle")
+
+        let sortButton = UIBarButtonItem(
+            image: sortIcon,
+            style: .plain,
+            target: self,
+            action: #selector(showActionSheet(_:))
+        )
+
+        self.navigationItem.rightBarButtonItem = sortButton
     }
 
     private func attachDelegates() {
@@ -147,6 +153,58 @@ extension LaunchesViewController {
                 }
             }
         }
+    }
+
+    @objc private func showActionSheet(_ sender: UIBarButtonItem) {
+        let actionSheet = UIAlertController(
+            title: "Order by",
+            message: """
+Select a field to which to order.
+Select again to reverse.
+
+Currently sorted \(viewModel.ordering.humanDescription).
+""",
+            preferredStyle: .actionSheet
+        )
+
+        let possibleOrderings: [Ordering] = [
+            Ordering(field: .byName, direction: .ascending),
+            Ordering(field: .byFlightNumber, direction: .ascending)
+        ]
+
+        for ordering in possibleOrderings {
+            let (nameTitle, newOrdering) = title(for: ordering)
+            let action = UIAlertAction(title: nameTitle, style: .default) { _ in
+                self.viewModel.tappedButtonToChangeOrdering(to: newOrdering)
+            }
+            actionSheet.addAction(action)
+        }
+
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in }
+        actionSheet.addAction(cancelAction)
+
+        self.present(actionSheet, animated: true)
+    }
+
+    /// Besides returning the title for action button, function also return ordering to which it should change
+    /// upon tapping.
+    private func title(for ordering: Ordering) -> (String, Ordering) {
+        var newOrdering = ordering
+        let checkmark = if ordering.field == viewModel.ordering.field {
+            "✓ "
+        } else {
+            ""
+        }
+        if ordering == viewModel.ordering {
+            newOrdering.direction = switch ordering.direction {
+            case .ascending: .descending
+            case .descending: .ascending
+            }
+        }
+
+        let title = checkmark + newOrdering.humanDescription
+        return (title, newOrdering)
+
     }
 
     private func showErrorMessageAlert(_ message: String) {

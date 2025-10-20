@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9028714B2EA23DA10086D0E0 /* License2Chill in Frameworks */ = {isa = PBXBuildFile; productRef = 9028714A2EA23DA10086D0E0 /* License2Chill */; };
+		90831F0D2EA63B8F001ABF95 /* Sharing in Frameworks */ = {isa = PBXBuildFile; productRef = 90831F0C2EA63B8F001ABF95 /* Sharing */; };
 		90BA55E62E9E97AE0086A85D /* Dependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 90BA55E52E9E97AE0086A85D /* Dependencies */; };
 		90BA55E82E9E97AE0086A85D /* DependenciesMacros in Frameworks */ = {isa = PBXBuildFile; productRef = 90BA55E72E9E97AE0086A85D /* DependenciesMacros */; };
 /* End PBXBuildFile section */
@@ -53,6 +54,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				90831F0D2EA63B8F001ABF95 /* Sharing in Frameworks */,
 				90BA55E82E9E97AE0086A85D /* DependenciesMacros in Frameworks */,
 				90BA55E62E9E97AE0086A85D /* Dependencies in Frameworks */,
 			);
@@ -126,6 +128,7 @@
 			packageProductDependencies = (
 				90BA55E52E9E97AE0086A85D /* Dependencies */,
 				90BA55E72E9E97AE0086A85D /* DependenciesMacros */,
+				90831F0C2EA63B8F001ABF95 /* Sharing */,
 			);
 			productName = "SpaceX Back In Time";
 			productReference = 90BA55332E9D32D20086A85D /* SpaceX Back In Time.app */;
@@ -163,6 +166,7 @@
 				90BA55552E9E795E0086A85D /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 				90BA55E42E9E97AE0086A85D /* XCRemoteSwiftPackageReference "swift-dependencies" */,
 				902871492EA23DA10086D0E0 /* XCRemoteSwiftPackageReference "license2chill" */,
+				90831F0B2EA63B8F001ABF95 /* XCRemoteSwiftPackageReference "swift-sharing" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 90BA55342E9D32D20086A85D /* Products */;
@@ -484,6 +488,14 @@
 				minimumVersion = 2.0.1;
 			};
 		};
+		90831F0B2EA63B8F001ABF95 /* XCRemoteSwiftPackageReference "swift-sharing" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-sharing.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.7.4;
+			};
+		};
 		90BA55552E9E795E0086A85D /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
@@ -507,6 +519,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 902871492EA23DA10086D0E0 /* XCRemoteSwiftPackageReference "license2chill" */;
 			productName = License2Chill;
+		};
+		90831F0C2EA63B8F001ABF95 /* Sharing */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 90831F0B2EA63B8F001ABF95 /* XCRemoteSwiftPackageReference "swift-sharing" */;
+			productName = Sharing;
 		};
 		90BA55562E9E79BF0086A85D /* SwiftLintBuildToolPlugin */ = {
 			isa = XCSwiftPackageProductDependency;

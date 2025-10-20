@@ -9,7 +9,7 @@ extension SpaceXRouter {
 // MARK: - Paths
 
 enum SpaceXRouter {
-    case launches(page: Int)
+    case launches(page: Int, order: Ordering)
 }
 
 // MARK: - Support
@@ -52,12 +52,12 @@ extension SpaceXRouter: Endpoint {
 
     var body: Data? {
         let body: Any = switch self {
-        case let .launches(page):
+        case let .launches(page, ordering):
             [
                 "options": [
                     "limit": Self.pageLimit,
                     "page": page,
-                    "sort": ["flight_number": "descending"],
+                    "sort": ordering.apiSorting,
                     "select": [
                         "id",
                         "name",
