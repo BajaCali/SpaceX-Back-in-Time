@@ -1,0 +1,46 @@
+
+* SpaceX Back In Time
+
+App fetches and represents data from SpaceX launches API. It was written as an interview task.
+
+
+** Architecture
+
+Mostly MVVM. There are two ViewModels: one for List and one for Detail. BackgroundView also incluces logic, but not to that extent MVVM is needed. Just a structured standard SwiftUI View is used.
+
+To make *inter-feature communication* easier, app also contains Events and EventBroker to distribute events within application between its parts - the ViewModels.
+
+Container Dependency Injection is used to inject services such as API handling or for the event broker from above.
+
+** Additional possible features
+
+App is feature rich, but there is always space to make it better. Some ideas are listed below:
+
+
+*** Launch Detail
+
+Fetch and present details about rocket, landpads, crew and payload. Connect to other launches via crews' other launches, landpad's other launches and so on. Push the navigation deeper.
+
+Use UIWebView inside a sheet to present some links where it makes sense. But leave space for the user to open in native apps if present.
+
+Fetch next launches when showing launch near bottom. This should be really easy to implement since the launch is updated from List.
+
+
+*** List
+
+Add separate section with lanche from this date/week.
+
+Make the Rows extendable so it shows even more detail.
+
+Introduce filters (e.g. only with images).
+
+Cache the results.
+
+Pull to refresh. But since the api is obsolete...
+
+Prompting the user to search with texts like "Search launch date", "Search in details" to highlight features.
+
+
+*** Others
+
+HorizontalLoading should be /easeIn-easeOut/, not linear.
