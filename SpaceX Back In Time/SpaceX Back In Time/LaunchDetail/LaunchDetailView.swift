@@ -1,5 +1,7 @@
 import SwiftUI
 import Dependencies
+import MapKit
+import CoreLocation
 
 // MARK: - Struct
 
@@ -25,6 +27,8 @@ extension LaunchDetailView: View {
         List {
             images
             infoSection
+            launchpadSection
+            launchpadMap
             moreDetailsSection
             discussionsSection
         }
@@ -67,6 +71,45 @@ extension LaunchDetailView {
 // MARK: - Sections
 
 extension LaunchDetailView {
+    var launchpadSection: some View {
+        Section("Launchpad Details") {
+            if let launchpad = viewModel.launchpad {
+                InfoRow(label: "Name", value: launchpad.name)
+                InfoRow(label: "Full Name", value: launchpad.fullName)
+                InfoRow(label: "Status", value: launchpad.status)
+                if let type = launchpad.type {
+                    InfoRow(label: "Type", value: type)
+                }
+                InfoRow(label: "Locality", value: launchpad.locality)
+                InfoRow(label: "Region", value: launchpad.region)
+                if let wikipediaURL = launchpad.wikipedia.flatMap({ URL(string: $0)}) {
+                    Link(destination: wikipediaURL) {
+                        Label("Wikipedia", systemImage: "globe")
+                    }
+                }
+            } else {
+                HStack {
+                    Text("Loading launchpad details...")
+                    Spacer()
+                    ProgressView()
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    var launchpadMap: some View {
+        if let launchpad = viewModel.launchpad {
+            MapView(
+                coordinate: .init(
+                    latitude: launchpad.latitude,
+                    longitude: launchpad.longitude
+                ),
+                markerTitle: launchpad.name
+            )
+        }
+    }
+
     var images: some View {
         ImagesView(
             patch: launch.patch?.large,

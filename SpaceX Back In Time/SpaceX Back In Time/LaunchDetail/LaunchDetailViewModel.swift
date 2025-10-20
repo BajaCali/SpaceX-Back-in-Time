@@ -5,6 +5,7 @@ extension LaunchDetailView {
     @Observable
     final class ViewModel {
         var state: ViewModel.State
+        var launchpad: Launchpad?
 
         init(_ state: ViewModel.State) {
             self.state = state
@@ -16,6 +17,8 @@ extension LaunchDetailView {
 
         @ObservationIgnored
         @Dependency(EventBroker.self) var eventBroker
+        @ObservationIgnored
+        @Dependency(LaunchpadFetcher.self) var launchpadFetcher
     }
 }
 
@@ -52,6 +55,7 @@ extension LaunchDetailView.ViewModel {
 
     func onAppear() {
         eventBroker.listen(.reusing(via: "LauchDetail"), handleEvents(_:))
+        fetchLaunchpad()
     }
 }
 
@@ -63,9 +67,24 @@ extension LaunchDetailView.ViewModel {
         case let .detail(.updateLaunchInDetail(state)):
             withAnimation {
                 self.state = state
+                fetchLaunchpad()
             }
             return
         default: return
+        }
+    }
+
+    private func fetchLaunchpad() {
+        Task {
+            do {
+                let launchpad = try await launchpadFetcher.getLaunchpad(state.launch.launchpadId)
+                await MainActor.run {
+                    self.launchpad = launchpad
+                }
+            } catch {
+                // Handle error
+                print("Failed to fetch launchpad: \(error)")
+            }
         }
     }
 }

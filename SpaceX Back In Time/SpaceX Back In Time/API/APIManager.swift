@@ -51,6 +51,7 @@ extension APIManager: APIManaging {
         do {
             return try decoder.decode(T.self, from: data)
         } catch {
+            print(error)
             throw .decodingError(error)
         }
     }

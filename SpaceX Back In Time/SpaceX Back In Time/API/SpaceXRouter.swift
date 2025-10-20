@@ -10,6 +10,7 @@ extension SpaceXRouter {
 
 enum SpaceXRouter {
     case launches(page: Int, order: Ordering)
+    case launchpad(id: String)
 }
 
 // MARK: - Support
@@ -30,12 +31,14 @@ extension SpaceXRouter: Endpoint {
     var path: String {
         switch self {
         case .launches: "launches/query"
+        case let .launchpad(id): "launchpads/\(id)"
         }
     }
 
     var method: HTTPMethod {
         switch self {
         case .launches: .post
+        case .launchpad: .get
         }
     }
 
@@ -47,11 +50,12 @@ extension SpaceXRouter: Endpoint {
         switch self {
         case .launches:
             ["Content-Type": "application/json"]
+        case .launchpad: nil
         }
     }
 
     var body: Data? {
-        let body: Any = switch self {
+        let body: Any? = switch self {
         case let .launches(page, ordering):
             [
                 "options": [
@@ -73,13 +77,16 @@ extension SpaceXRouter: Endpoint {
                     ]
                 ]
             ]
+        case .launchpad: nil
         }
 
-        do {
-            return try JSONSerialization.data(withJSONObject: body)
-        } catch {
-            print("Failed to serialise body with error: \(error)")
-            return nil
+        return body.flatMap { body in
+            do {
+                return try JSONSerialization.data(withJSONObject: body)
+            } catch {
+                print("Failed to serialise body with error: \(error)")
+                return nil
+            }
         }
     }
 }
