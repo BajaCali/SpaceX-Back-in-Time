@@ -1,6 +1,7 @@
 import Combine
 import Dependencies
 import Synchronization
+import Sharing
 
 // MARK: - Class
 
@@ -30,7 +31,7 @@ extension LaunchesViewController {
 
         @Published var launchInDetail: Launch?
 
-        var ordering: Ordering = .default
+        @Shared(.appStorage("launchesOrdering")) var ordering: Ordering = .default
 
         init() {
             self.launches = .init()
@@ -222,7 +223,7 @@ extension LaunchesViewController.ViewModel {
     }
 
     func tappedButtonToChangeOrdering(to newOrdering: Ordering) {
-        self.ordering = newOrdering
+        self.$ordering.withLock { $0 = newOrdering }
         reloadAllData()
     }
 }
