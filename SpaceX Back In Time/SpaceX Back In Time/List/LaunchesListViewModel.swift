@@ -29,6 +29,9 @@ extension LaunchesViewController {
         var totalLaunches: Int?
 
         @Published var launchInDetail: Launch?
+
+        var ordering: Ordering = .default
+
         init() {
             self.launches = .init()
         }
@@ -94,7 +97,8 @@ extension LaunchesViewController.ViewModel {
         let nextPage = (launches.count / SpaceXRouter.pageLimit) + 1
         Task(priority: .userInitiated) {
             do {
-                let launches: LaunchesRaw = try await launchesFetcher.getLaunchesPage(nextPage)
+                let launches: LaunchesRaw = try await launchesFetcher
+                    .getLaunchesPage(nextPage, ordering)
                 dataFetched(.success(launches))
             } catch {
                 guard let apiError = error as? APIError else { return }
@@ -131,6 +135,11 @@ extension LaunchesViewController.ViewModel {
                 errorMessage = apiError.description
             }
         }
+    }
+
+    private func reloadAllData() {
+        self.launches.removeAll()
+        fetchAdditionalData()
     }
 
     // MARK: Other
@@ -211,5 +220,10 @@ extension LaunchesViewController.ViewModel {
 
     func detailPushed(with launch: Launch) {
         self.launchInDetail = launch
+    }
+
+    func tappedButtonToChangeOrdering(to newOrdering: Ordering) {
+        self.ordering = newOrdering
+        reloadAllData()
     }
 }

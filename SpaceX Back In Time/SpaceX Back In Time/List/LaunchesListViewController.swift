@@ -158,22 +158,53 @@ extension LaunchesViewController {
     @objc private func showActionSheet(_ sender: UIBarButtonItem) {
         let actionSheet = UIAlertController(
             title: "Order by",
-            message: "Select a field to which to order.\nSelect again to reverse.",
+            message: """
+Select a field to which to order.
+Select again to reverse.
+
+Currently sorted \(viewModel.ordering.humanDescription).
+""",
             preferredStyle: .actionSheet
         )
 
-        let byName = UIAlertAction(title: "Name", style: .default) { _ in
-        }
+        let possibleOrderings: [Ordering] = [
+            Ordering(field: .byName, direction: .ascending),
+            Ordering(field: .byFlightNumber, direction: .ascending)
+        ]
 
-        let byDate = UIAlertAction(title: "Date", style: .default) { _ in
+        for ordering in possibleOrderings {
+            let (nameTitle, newOrdering) = title(for: ordering)
+            let action = UIAlertAction(title: nameTitle, style: .default) { _ in
+                self.viewModel.tappedButtonToChangeOrdering(to: newOrdering)
+            }
+            actionSheet.addAction(action)
         }
 
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in }
-
-        actionSheet.addAction(byName)
-        actionSheet.addAction(byDate)
         actionSheet.addAction(cancelAction)
+
         self.present(actionSheet, animated: true)
+    }
+
+    /// Besides returning the title for action button, function also return ordering to which it should change
+    /// upon tapping.
+    private func title(for ordering: Ordering) -> (String, Ordering) {
+        var newOrdering = ordering
+        let checkmark = if ordering.field == viewModel.ordering.field {
+            "✓ "
+        } else {
+            ""
+        }
+        if ordering == viewModel.ordering {
+            newOrdering.direction = switch ordering.direction {
+            case .ascending: .descending
+            case .descending: .ascending
+            }
+        }
+
+        let title = checkmark + newOrdering.humanDescription // ordering.field.description + direction.description
+        return (title, newOrdering)
+
     }
 
     private func showErrorMessageAlert(_ message: String) {
