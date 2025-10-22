@@ -3,6 +3,8 @@
 
 App fetches and represents data from SpaceX launches API. It was written as an interview task.
 
+Build for & tested on *iOS 18*.
+
 
 ** Architecture
 
@@ -44,3 +46,19 @@ Prompting the user to search with texts like "Search launch date", "Search in de
 *** Others
 
 HorizontalLoading should be /easeIn-easeOut/, not linear.
+
+
+
+** Known Bugs
+
+What would the tester throw back at me - the dev.
+
+*** Loading view invisible when searching
+
+Reproduce: Put "nonexistinglaunch" into search and watch how the /No launches view/ is not centered between search bar and keyboard. Same goes for loading view.
+
+
+*** On cold launch of the app the loading view seems to be missing
+
+
+*** Patches in the list view are still reloading when re-appearing
