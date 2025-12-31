@@ -119,7 +119,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				90BA55572E9E79BF0086A85D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				90BA55352E9D32D20086A85D /* SpaceX Back In Time */,
@@ -163,7 +162,6 @@
 			mainGroup = 90BA552A2E9D32D20086A85D;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				90BA55552E9E795E0086A85D /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 				90BA55E42E9E97AE0086A85D /* XCRemoteSwiftPackageReference "swift-dependencies" */,
 				902871492EA23DA10086D0E0 /* XCRemoteSwiftPackageReference "license2chill" */,
 				90831F0B2EA63B8F001ABF95 /* XCRemoteSwiftPackageReference "swift-sharing" */,
@@ -218,10 +216,6 @@
 			isa = PBXTargetDependency;
 			target = 90BA55322E9D32D20086A85D /* SpaceX Back In Time */;
 			targetProxy = 902871412EA23D080086D0E0 /* PBXContainerItemProxy */;
-		};
-		90BA55572E9E79BF0086A85D /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = 90BA55562E9E79BF0086A85D /* SwiftLintBuildToolPlugin */;
 		};
 /* End PBXTargetDependency section */
 
@@ -494,14 +488,6 @@
 				minimumVersion = 2.7.4;
 			};
 		};
-		90BA55552E9E795E0086A85D /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.62.1;
-			};
-		};
 		90BA55E42E9E97AE0086A85D /* XCRemoteSwiftPackageReference "swift-dependencies" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pointfreeco/swift-dependencies.git";
@@ -522,11 +508,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 90831F0B2EA63B8F001ABF95 /* XCRemoteSwiftPackageReference "swift-sharing" */;
 			productName = Sharing;
-		};
-		90BA55562E9E79BF0086A85D /* SwiftLintBuildToolPlugin */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 90BA55552E9E795E0086A85D /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
-			productName = "plugin:SwiftLintBuildToolPlugin";
 		};
 		90BA55E52E9E97AE0086A85D /* Dependencies */ = {
 			isa = XCSwiftPackageProductDependency;
