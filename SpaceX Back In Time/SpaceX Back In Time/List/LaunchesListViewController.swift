@@ -117,12 +117,14 @@ extension LaunchesViewController {
 
         viewModel.$errorMessage
             .compactMap(\.self)
+            .receive(on: RunLoop.main)
             .sink { [weak self] errorMessage in
                 self?.showErrorMessageAlert(errorMessage)
             }
             .store(in: &bindings)
 
         viewModel.$state
+            .receive(on: RunLoop.main)
             .sink { [weak self] state in
                 self?.setScrolling(basedOn: state)
                 self?.refreshTableView()
@@ -143,15 +145,11 @@ extension LaunchesViewController {
 
 extension LaunchesViewController {
     private func setScrolling(basedOn state: ViewModel.State) {
-        Task {
-            await MainActor.run {
-                switch state {
-                case .initial, .loading, .networkIssue:
-                    tableView.isScrollEnabled = false
-                case .loadingMore, .loadingMoreFailed, .loaded, .noSearchResults:
-                    tableView.isScrollEnabled = true
-                }
-            }
+        switch state {
+        case .initial, .loading, .networkIssue:
+            tableView.isScrollEnabled = false
+        case .loadingMore, .loadingMoreFailed, .loaded, .noSearchResults:
+            tableView.isScrollEnabled = true
         }
     }
 
@@ -208,34 +206,30 @@ Currently sorted \(viewModel.ordering.humanDescription).
     }
 
     private func showErrorMessageAlert(_ message: String) {
-        Task {
-            await MainActor.run {
-                let confirmAction = UIAlertAction(
-                    title: "Ok",
-                    style: .cancel
-                ) { [weak self] _ in
-                    self?.viewModel.errorOkButtonTapped()
-                }
-
-                let tryAgainAction = UIAlertAction(
-                    title: "Try Again",
-                    style: .default
-                ) { [weak self] _ in
-                    self?.viewModel.errorTryAgainButtonTapped()
-                }
-
-                let alert = UIAlertController(
-                    title: "Network Error",
-                    message: message,
-                    preferredStyle: .alert
-                )
-
-                alert.addAction(confirmAction)
-                alert.addAction(tryAgainAction)
-
-                self.present(alert, animated: true)
-            }
+        let confirmAction = UIAlertAction(
+            title: "Ok",
+            style: .cancel
+        ) { [weak self] _ in
+            self?.viewModel.errorOkButtonTapped()
         }
+
+        let tryAgainAction = UIAlertAction(
+            title: "Try Again",
+            style: .default
+        ) { [weak self] _ in
+            self?.viewModel.errorTryAgainButtonTapped()
+        }
+
+        let alert = UIAlertController(
+            title: "Network Error",
+            message: message,
+            preferredStyle: .alert
+        )
+
+        alert.addAction(confirmAction)
+        alert.addAction(tryAgainAction)
+
+        self.present(alert, animated: true)
     }
 
     private func pushDetail(for launch: Launch) {
@@ -299,10 +293,6 @@ extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     private func refreshTableView() {
-        Task {
-            await MainActor.run {
-                tableView.reloadData()
-            }
-        }
+        tableView.reloadData()
     }
 }
