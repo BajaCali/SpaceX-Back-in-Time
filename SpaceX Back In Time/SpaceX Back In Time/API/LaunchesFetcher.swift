@@ -19,7 +19,11 @@ extension LaunchesFetcher: DependencyKey {
             getLaunchesPage: { (_, _) in
                 let decoder = JSONDecoder()
                 // swiftlint:disable:next force_try
+#if DEBUG
                 return try! decoder.decode(LaunchesRaw.self, from: LaunchesRaw.firstPage)
+#else
+                return LaunchesRaw(docs: [], totalDocs: 0)
+#endif // DEBUG
             }
         )
     }

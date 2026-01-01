@@ -149,6 +149,7 @@ extension LaunchDetailView {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     let launch = Launch.withImages
 
@@ -157,3 +158,4 @@ extension LaunchDetailView {
             .navigationTitle(launch.title)
     }
 }
+#endif // DEBUG
