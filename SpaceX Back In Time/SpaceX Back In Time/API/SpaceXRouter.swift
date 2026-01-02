@@ -43,40 +43,21 @@ extension SpaceXRouter: Endpoint {
         nil
     }
 
-    var headers: [String: String]? {
+    var headers: [Header]? {
         switch self {
         case .launches:
-            ["Content-Type": "application/json"]
+            [.contentType(.applicationJson)]
         }
     }
 
     var body: Data? {
-        let body: Any = switch self {
+        let body: Encodable = switch self {
         case let .launches(page, ordering):
-            [
-                "options": [
-                    "limit": Self.pageLimit,
-                    "page": page,
-                    "sort": ordering.apiSorting,
-                    "select": [
-                        "id",
-                        "name",
-                        "details",
-                        "success",
-                        "date_unix",
-                        "flight_number",
-                        "launchpad",
-                        "capsules",
-                        "payloads",
-                        "rocket",
-                        "links"
-                    ]
-                ]
-            ]
+            LaunchesBody(page: page, pageLimit: Self.pageLimit, orderedBy: ordering)
         }
 
         do {
-            return try JSONSerialization.data(withJSONObject: body)
+            return try JSONEncoder().encode(body)
         } catch {
             print("Failed to serialise body with error: \(error)")
             return nil

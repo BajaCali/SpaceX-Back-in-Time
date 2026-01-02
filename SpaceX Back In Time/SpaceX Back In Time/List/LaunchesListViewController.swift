@@ -160,7 +160,7 @@ extension LaunchesViewController {
 Select a field to which to order.
 Select again to reverse.
 
-Currently sorted \(viewModel.ordering.humanDescription).
+Currently sorted by \(viewModel.ordering.humanDescription).
 """,
             preferredStyle: .actionSheet
         )
@@ -187,21 +187,27 @@ Currently sorted \(viewModel.ordering.humanDescription).
     /// Besides returning the title for action button, function also return ordering to which it should change
     /// upon tapping.
     private func title(for ordering: Ordering) -> (String, Ordering) {
-        var newOrdering = ordering
-        let checkmark = if ordering.field == viewModel.ordering.field {
+        let currentOrdering = viewModel.ordering
+
+        let checkmark = if ordering.field == currentOrdering.field {
             "✓ "
         } else {
             ""
         }
-        if ordering == viewModel.ordering {
-            newOrdering.direction = switch ordering.direction {
-            case .ascending: .descending
-            case .descending: .ascending
-            }
-        }
 
-        let title = checkmark + newOrdering.humanDescription
-        return (title, newOrdering)
+        let direction: Ordering.Direction = {
+            if ordering == currentOrdering {
+                return switch ordering.direction {
+                case .ascending: .descending
+                case .descending: .ascending
+                }
+            }
+            return ordering.direction
+        }()
+
+        let adjustedOrdering = Ordering(field: ordering.field, direction: direction)
+        let title = checkmark + adjustedOrdering.humanDescription
+        return (title, adjustedOrdering)
 
     }
 

@@ -4,7 +4,7 @@ import Foundation
 
 struct Ordering: Codable, Equatable {
     let field: Field
-    var direction: Direction
+    let direction: Direction
 }
 
 // MARK: - Sub-Models
@@ -21,14 +21,6 @@ extension Ordering {
     enum Direction: String, Codable, Equatable {
         case ascending
         case descending
-    }
-}
-
-// MARK: - API Convertible
-
-extension Ordering {
-    var apiSorting: [String: String] {
-        [field.rawValue: direction.rawValue]
     }
 }
 

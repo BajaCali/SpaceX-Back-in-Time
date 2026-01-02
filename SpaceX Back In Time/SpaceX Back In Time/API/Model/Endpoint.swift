@@ -7,7 +7,7 @@ protocol Endpoint {
     var path: String { get }
     var method: HTTPMethod { get }
     var urlParameters: [(String, Any)]? { get }
-    var headers: [String: String]? { get }
+    var headers: [Header]? { get }
     var body: Data? { get }
 
     func asRequest() throws(APIError) -> URLRequest
@@ -33,8 +33,13 @@ extension Endpoint {
 
         var request = URLRequest(url: requestUrl)
 
+
+        let httpHeaders = headers.flatMap {
+            [String: String].init(uniqueKeysWithValues: $0.map(\.flatten))
+        }
+
         request.httpMethod = method.rawValue
-        request.allHTTPHeaderFields = headers
+        request.allHTTPHeaderFields = httpHeaders
         request.httpBody = body
 
 #if targetEnvironment(simulator)
