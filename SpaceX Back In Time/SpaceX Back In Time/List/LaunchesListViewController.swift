@@ -44,7 +44,7 @@ extension LaunchesViewController {
     }
 
     private func setupBackground() {
-        let swiftUIView = UIHostingController(rootView: BackgroundView(initialState: viewModel.state))
+        let swiftUIView = UIHostingController(rootView: BackgroundView(initialState: .loading))
 
         backgroundView.addSubview(swiftUIView.view)
 
