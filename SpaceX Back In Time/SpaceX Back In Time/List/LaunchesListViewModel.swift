@@ -1,3 +1,4 @@
+import Foundation
 import Combine
 import Dependencies
 import Synchronization
@@ -180,6 +181,11 @@ extension LaunchesViewController.ViewModel {
         privateState.withLock { $0 = newState }
         state = newState
     }
+
+    private func adjustURLCacheForImages() {
+        URLCache.shared.memoryCapacity = 50_000_000
+        URLCache.shared.diskCapacity = 500_000_000
+    }
 }
 
 // MARK: - VM -> View
@@ -201,6 +207,7 @@ extension LaunchesViewController.ViewModel {
     func onAppear() {
         fetchAdditionalData()
         eventBroker.listen(.singleUse, self.handleEvent(_:))
+        adjustURLCacheForImages()
     }
 
     func errorOkButtonTapped() {
