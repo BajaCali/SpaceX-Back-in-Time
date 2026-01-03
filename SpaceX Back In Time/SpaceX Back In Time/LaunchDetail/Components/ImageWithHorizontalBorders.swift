@@ -10,8 +10,7 @@ struct ImageWithHorizontalBorders: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(height: 200)
-                .clipped()
-                .cornerRadius(8)
+                .clipShape(.rect(cornerRadius: 16, style: .continuous))
         } placeholder: {
             ProgressView()
         }
