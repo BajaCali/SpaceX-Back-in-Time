@@ -7,6 +7,8 @@ extension LaunchDetailView {
         let patch: URL?
         let images: [URL]
         @State private var showImagesButtonNotYetTapped = true
+        @State private var firstImageShownAlready = false
+        @State private var displayImages = false
         @State private var scrollProxy: ScrollViewProxy?
         @State private var size: CGSize = .zero
     }
@@ -33,8 +35,14 @@ extension LaunchDetailView.ImagesView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 0) {
                         ImageWithHorizontalBorders(url: patch, width: size.width)
-                        ForEach(images, id: \.self) { url in
-                            ImageWithHorizontalBorders(url: url, width: size.width)
+                        if displayImages {
+                            ForEach(images, id: \.self) { url in
+                                ImageWithHorizontalBorders(url: url, width: size.width)
+                                    .onScrollVisibilityChange(threshold: 0.9) { visible in
+                                        guard visible else { return }
+                                        firstImageShownAlready = true
+                                    }
+                            }
                         }
                     }
                 }
@@ -47,6 +55,9 @@ extension LaunchDetailView.ImagesView: View {
                 .onAppear {
                     scrollProxy = proxy
                 }
+                .onChange(of: size) { (_, _) in
+                    displayImages = true
+                }
             }
         }
     }
@@ -55,9 +66,13 @@ extension LaunchDetailView.ImagesView: View {
 // MARK: - Parts
 
 extension LaunchDetailView.ImagesView {
+    private var shouldShowSlideToFirstImageButton: Bool {
+        images.isNotEmpty && showImagesButtonNotYetTapped && firstImageShownAlready == false
+    }
+
     @ViewBuilder
     var slideToFirstImageButton: some View {
-        if images.isNotEmpty && showImagesButtonNotYetTapped {
+        if shouldShowSlideToFirstImageButton {
             Button(
                 "Show Image",
                 systemImage: "arrow.up.right.bottomleft.rectangle.fill"
