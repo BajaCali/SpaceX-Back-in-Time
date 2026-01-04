@@ -1,4 +1,6 @@
 import Foundation
+import Dependencies
+import Logging
 
 // MARK: - Constants
 
@@ -23,6 +25,11 @@ extension SpaceXRouter {
 // MARK: - Endpoint properties
 
 extension SpaceXRouter: Endpoint {
+    static var logger: Logger {
+        @LabeledLogger(for: SpaceXRouter.self) var logger
+        return logger
+    }
+
     static var baseUrl: URL {
         URL(string: "https://api.spacexdata.com/v4/")!
     }
@@ -59,7 +66,7 @@ extension SpaceXRouter: Endpoint {
         do {
             return try JSONEncoder().encode(body)
         } catch {
-            print("Failed to serialise body with error: \(error)")
+            Self.logger.error("Failed to serialise body with error: \(error)")
             return nil
         }
     }

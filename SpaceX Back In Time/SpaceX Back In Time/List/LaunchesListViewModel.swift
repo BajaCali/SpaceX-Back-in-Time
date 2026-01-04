@@ -95,6 +95,10 @@ extension LaunchesViewController.ViewModel {
         fetchNextPageLaunches()
     }
 
+    enum TestError: Error {
+        case numb
+    }
+
     private func fetchNextPageLaunches() {
         let nextPage = (launches.count / SpaceXRouter.pageLimit) + 1
         Task(priority: .userInitiated) {
