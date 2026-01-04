@@ -5,14 +5,14 @@ import Foundation
 struct Launch {
     let id: String
     let title: String
-    var success: Bool
-    var date: Date
-    var flightNumber: Int
-    var details: String?
-    var rocketId: String
-    var capsulesIds: [String]
-    var payloadsIds: [String]
-    var launchpadId: String
+    let success: Bool
+    let date: Date
+    let flightNumber: Int
+    let details: String?
+    let rocketId: String
+    let capsulesIds: [String]
+    let payloadsIds: [String]
+    let launchpadId: String
 
     // Links
     let patch: Patch?
