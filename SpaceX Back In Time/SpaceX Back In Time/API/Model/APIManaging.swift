@@ -1,5 +1,5 @@
 import Foundation
 
 protocol APIManaging {
-    func request<T: Decodable>(_ endpoint: Endpoint) async throws -> T
+    func request<T: Decodable>(_ endpoint: Endpoint) async throws(APIError) -> T
 }

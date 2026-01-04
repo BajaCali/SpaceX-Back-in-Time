@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import Dependencies
+import Logging
 import Synchronization
 import Sharing
 
@@ -33,6 +34,8 @@ extension LaunchesViewController {
         @Published var launchInDetail: Launch?
 
         @Shared(.appStorage("launchesOrdering")) var ordering: Ordering = .default
+
+        @LabeledLogger(for: LaunchesViewController.ViewModel.self) var logger
 
         init() {
             self.launches = .init()
@@ -95,39 +98,33 @@ extension LaunchesViewController.ViewModel {
         fetchNextPageLaunches()
     }
 
-    enum TestError: Error {
-        case numb
-    }
-
     private func fetchNextPageLaunches() {
         let nextPage = (launches.count / SpaceXRouter.pageLimit) + 1
         Task(priority: .userInitiated) {
-            do {
-                let launches: LaunchesRaw = try await launchesFetcher
+            do throws(APIError) {
+                let launchesRaw: LaunchesRaw = try await launchesFetcher
                     .getLaunchesPage(nextPage, ordering)
-                dataFetched(.success(launches))
+                dataFetched(.success(launchesRaw))
             } catch {
-                guard let apiError = error as? APIError else { return }
-                dataFetched(.failure(apiError))
+                logger.error("Failed to fetch launches: \(error)")
+                dataFetched(.failure(error))
             }
         }
     }
 
     private func dataFetched(_ launchesResult: Result<LaunchesRaw, APIError>) {
         switch launchesResult {
-        case let .success(launches):
-            self.launches.append(contentsOf: launches.launches)
-            self.totalLaunches = launches.totalDocs
+        case let .success(rawLaunches):
+            let newLaunches = rawLaunches.launches
+            self.launches.append(contentsOf: newLaunches)
+            self.totalLaunches = rawLaunches.totalDocs
 
             switch (filteredLaunches.isEmpty, canLoadMore) {
-                // success - at least one new launch is filtered in (more via rendering row
             case (false, _):
                 updateState(to: .loaded)
-                // new launches failed to provide search criteria -> dig deeper
             case (true, true):
                 fetchNextPageLaunches()
                 updateState(to: .loading)
-                // cant search more & search failed
             case (true, false):
                 updateState(to: .noSearchResults(searchText))
             }
@@ -238,3 +235,4 @@ extension LaunchesViewController.ViewModel {
         reloadAllData()
     }
 }
+
