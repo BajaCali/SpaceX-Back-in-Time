@@ -10,12 +10,4 @@ enum Event {
     enum Background {
         case tryAgainButtonTapped
     }
-
-    case detail(Detail)
-    enum Detail {
-        case dismissing
-        case nextLaunchButtonTapped
-        case prevLaunchButtonTapped
-        case updateLaunchInDetail(LaunchDetailView.ViewModel.State)
-    }
 }

@@ -4,6 +4,7 @@ import Dependencies
 import Logging
 import Synchronization
 import Sharing
+import SwiftUI
 
 // MARK: - Class
 
@@ -31,7 +32,7 @@ extension LaunchesViewController {
         private let privateState: Mutex<State> = .init(.initial)
         var totalLaunches: Int?
 
-        @Published var launchInDetail: Launch?
+        @Published var detailViewModel: LaunchDetailView.ViewModel?
 
         @Shared(.appStorage("launchesOrdering")) var ordering: Ordering = .default
 
@@ -44,7 +45,6 @@ extension LaunchesViewController {
         // MARK: Dependencies
 
         @Dependency(LaunchesFetcher.self) var launchesFetcher
-        @Dependency(EventBroker.self) var eventBroker
     }
 }
 
@@ -52,39 +52,60 @@ extension LaunchesViewController {
 
 extension LaunchesViewController.ViewModel {
 
-    // MARK: Events
+    // MARK: Detail View Callbacks
 
-    private func handleEvent(_  event: Event) {
-        switch event {
-        case .list: return
-
-        case .detail(.nextLaunchButtonTapped):
-            guard
-                let launchInDetail,
-                let currentLaunchIndex = launches.firstIndex(of: launchInDetail),
-                currentLaunchIndex < (launches.endIndex - 1)
-            else {
-                return
-            }
-            sendNewLaunchToDetail(at: launches.index(after: currentLaunchIndex))
+    private func advanceToNextLaunch() {
+        guard
+            let currentDetailLaunch = detailViewModel?.state.launch,
+            let currentLaunchIndex = launches.firstIndex(of: currentDetailLaunch),
+            currentLaunchIndex < (launches.endIndex - 1)
+        else {
             return
-        case .detail(.prevLaunchButtonTapped):
-            guard
-                let launchInDetail,
-                let currentLaunchIndex = launches.firstIndex(of: launchInDetail),
-                currentLaunchIndex >= 1
-            else {
-                return
-            }
-            sendNewLaunchToDetail(at: launches.index(before: currentLaunchIndex))
-            return
-        case .detail(.dismissing):
-            launchInDetail = nil
-        case .detail: return
-
-        case .background(.tryAgainButtonTapped):
-            fetchAdditionalData()
         }
+        // Directly update the state of the existing detailViewModel instance
+        updateDetailViewModel(at: launches.index(after: currentLaunchIndex))
+    }
+
+    private func goBackToPreviousLaunch() {
+        guard
+            let currentDetailLaunch = detailViewModel?.state.launch,
+            let currentLaunchIndex = launches.firstIndex(of: currentDetailLaunch),
+            currentLaunchIndex >= 1
+        else {
+            return
+        }
+        // Directly update the state of the existing detailViewModel instance
+        updateDetailViewModel(at: launches.index(before: currentLaunchIndex))
+    }
+
+    private func dismissDetailView() {
+        detailViewModel = nil
+    }
+
+
+    // MARK: Detail Creation
+
+    func makeDetailViewModel(for launch: Launch) -> LaunchDetailView.ViewModel? {
+        guard let detailState = self.generateDetailState(for: launch) else { return nil }
+
+        let viewModel = LaunchDetailView.ViewModel(
+            launch: detailState.launch,
+            hasNext: detailState.hasNext,
+            hasPrev: detailState.hasPrev,
+            onNextLaunch: { [weak self] in
+                self?.advanceToNextLaunch()
+            },
+            onPrevLaunch: { [weak self] in
+                self?.goBackToPreviousLaunch()
+            },
+            onDismiss: { [weak self] in
+                self?.dismissDetailView()
+            }
+        )
+
+        self.detailViewModel = viewModel
+
+        return viewModel
     }
 
     // MARK: Fetching
@@ -152,11 +173,12 @@ extension LaunchesViewController.ViewModel {
         return value
     }
 
-    private func sendNewLaunchToDetail(at index: Int) {
+    private func updateDetailViewModel(at index: Int) {
         let newLaunch = launches[index]
         if let newDetailState = generateDetailState(for: newLaunch) {
-            eventBroker.post(.detail(.updateLaunchInDetail(newDetailState)))
-            launchInDetail = newLaunch
+            withAnimation {
+                detailViewModel?.state = newDetailState
+            }
         }
     }
 
@@ -207,7 +229,6 @@ extension LaunchesViewController.ViewModel {
 extension LaunchesViewController.ViewModel {
     func onAppear() {
         fetchAdditionalData()
-        eventBroker.listen(.singleUse, self.handleEvent(_:))
         adjustURLCacheForImages()
     }
 
@@ -226,13 +247,9 @@ extension LaunchesViewController.ViewModel {
         }
     }
 
-    func detailPushed(with launch: Launch) {
-        self.launchInDetail = launch
-    }
 
     func tappedButtonToChangeOrdering(to newOrdering: Ordering) {
         self.$ordering.withLock { $0 = newOrdering }
         reloadAllData()
     }
 }
-

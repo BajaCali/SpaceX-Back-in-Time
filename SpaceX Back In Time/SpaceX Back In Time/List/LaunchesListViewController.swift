@@ -130,14 +130,6 @@ extension LaunchesViewController {
                 self?.refreshTableView()
             }
             .store(in: &bindings)
-
-        viewModel.$launchInDetail
-            .sink { [weak self] launch in
-                launch.flatMap {
-                    self?.updateDetailsTitle(of: $0)
-                }
-            }
-            .store(in: &bindings)
     }
 }
 
@@ -239,15 +231,13 @@ Currently sorted by \(viewModel.ordering.humanDescription).
     }
 
     private func pushDetail(for launch: Launch) {
-        guard let detailState = viewModel
-            .generateDetailState(for: launch) else {
-            return
-        }
-        let detailController = UIHostingController(rootView: LaunchDetailView(.init(detailState)))
+        guard let detailViewModel = viewModel.makeDetailViewModel(for: launch) else { return }
+
+        let detailController = UIHostingController(rootView: LaunchDetailView(detailViewModel))
         detailController.title = launch.title
+        detailViewModel.viewController = detailController
         navigationController?.pushViewController(detailController, animated: true)
         self.detailViewController = detailController
-        viewModel.detailPushed(with: launch)
     }
 
     private func updateDetailsTitle(of launch: Launch) {
@@ -295,7 +285,6 @@ extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         let selectedLaunch = viewModel.filteredLaunches[indexPath.row]
         pushDetail(for: selectedLaunch)
-        viewModel.detailPushed(with: selectedLaunch)
     }
 
     private func refreshTableView() {
