@@ -10,24 +10,15 @@ extension BackgroundView {
 }
 
 struct BackgroundView {
-    @State private var state: LaunchesViewController.ViewModel.State
+    @State private var stateStore: LaunchesViewController.ViewModel.StateStore
+    let onTryAgainButtonTap: () -> Void
 
-    init(initialState: LaunchesViewController.ViewModel.State) {
-        self.state = initialState
-    }
-
-    @Dependency(EventBroker.self) var eventBroker
-
-    func onAppear() {
-        eventBroker.listen(.reusing(via: "Background"), self.handleEvent(_:))
-    }
-
-    func handleEvent(_ event: Event) {
-        switch event {
-        case let .list(.stateUpdated(newState)):
-            self.state = newState
-        default: return
-        }
+    init(
+        stateStore: LaunchesViewController.ViewModel.StateStore,
+        onTryAgainButtonTap: @escaping () -> Void
+    ) {
+        self.stateStore = stateStore
+        self.onTryAgainButtonTap = onTryAgainButtonTap
     }
 }
 
@@ -35,13 +26,7 @@ struct BackgroundView {
 
 extension BackgroundView: View {
     var body: some View {
-        content
-            .onAppear(perform: onAppear)
-    }
-
-    @ViewBuilder
-    var content: some View {
-        switch state {
+        switch stateStore.state {
         case .initial, .loaded, .loadingMore, .loadingMoreFailed:
             EmptyView()
         case .loading:
@@ -71,11 +56,8 @@ extension BackgroundView: View {
             } description: {
                 Text(errorDescription)
             } actions: {
-                Button("Try Again", systemImage: "repeat") {
-                    eventBroker.post(.background(.tryAgainButtonTapped))
-                }
-                .buttonStyle(.bordered)
-                .labelStyle(.titleAndIcon)
+                Button("Try Again", systemImage: "repeat", action: onTryAgainButtonTap)                .buttonStyle(.bordered)
+                    .labelStyle(.titleAndIcon)
             }
         }
     }
@@ -98,14 +80,25 @@ extension BackgroundView: View {
 
 // MARK: - Previews
 
+#if DEBUG
+
+extension LaunchesViewController.ViewModel.StateStore {
+    convenience init(_ state: LaunchesViewController.ViewModel.State) {
+        self.init(state, configure: { _ in })
+    }
+}
+
 #Preview("Loading") {
-    BackgroundView(initialState: .loading)
+    BackgroundView(stateStore: .init(.loading), onTryAgainButtonTap: { })
 }
 
 #Preview("Network error") {
-    BackgroundView(initialState: .networkIssue("Yeah, an networking error happened..."))
+    BackgroundView(stateStore: .init(.networkIssue("Yeah, an networking error happened...")), onTryAgainButtonTap: { })
 }
 
 #Preview("Aless gut") {
-    BackgroundView(initialState: .loaded)
+    BackgroundView(stateStore: .init(.loaded), onTryAgainButtonTap: { })
 }
+
+#endif // DEBUG
+

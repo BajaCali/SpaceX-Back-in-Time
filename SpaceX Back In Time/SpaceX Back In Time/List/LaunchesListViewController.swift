@@ -1,6 +1,8 @@
 import UIKit
 import SwiftUI
 import Combine
+import Observation
+import Logging
 
 class LaunchesViewController: UIViewController {
     private let tableView = UITableView()
@@ -10,6 +12,9 @@ class LaunchesViewController: UIViewController {
     private var viewModel = ViewModel()
 
     private var bindings = Set<AnyCancellable>()
+
+    @LabeledLogger(for: LaunchesViewController.self) var logger
+
 }
 
 // MARK: - Cells
@@ -44,7 +49,17 @@ extension LaunchesViewController {
     }
 
     private func setupBackground() {
-        let swiftUIView = UIHostingController(rootView: BackgroundView(initialState: .loading))
+        guard let stateStore = viewModel.stateStore else {
+            logger.error("StateStore not upon setting up background")
+            return
+        }
+
+        let swiftUIView = UIHostingController(
+            rootView: BackgroundView(
+                stateStore: stateStore,
+                onTryAgainButtonTap: viewModel.onBackgroundTryAgainButtonTapped
+            )
+        )
 
         backgroundView.addSubview(swiftUIView.view)
 
@@ -123,7 +138,7 @@ extension LaunchesViewController {
             }
             .store(in: &bindings)
 
-        viewModel.$state
+        viewModel.stateStore?.publisher
             .receive(on: RunLoop.main)
             .sink { [weak self] state in
                 self?.setScrolling(basedOn: state)

@@ -9,6 +9,7 @@ import SwiftUI
 // MARK: - Class
 
 extension LaunchesViewController {
+    @MainActor
     final class ViewModel {
         @Published var launches: [Launch]
         @Published var searchText: String = "" {
@@ -16,12 +17,11 @@ extension LaunchesViewController {
                 searchTextUpdated(oldValue: oldValue)
             }
         }
-        @Published var state: State = .initial {
-            didSet {
-                @Dependency(EventBroker.self) var eventBroker
-                eventBroker.post(.list(.stateUpdated(state)))
-            }
+        var stateStore: StateStore?
+        var state: State? {
+            stateStore?.state
         }
+        var stateController: StateStore.Controller?
         @Published var errorMessage: String?
 
         var filteredLaunches: [Launch] {
@@ -29,7 +29,6 @@ extension LaunchesViewController {
             return launches.filter { $0.match(by: searchText) }
         }
 
-        private let privateState: Mutex<State> = .init(.initial)
         var totalLaunches: Int?
 
         @Published var detailViewModel: LaunchDetailView.ViewModel?
@@ -40,6 +39,9 @@ extension LaunchesViewController {
 
         init() {
             self.launches = .init()
+            self.stateStore = .init(.initial) { [weak self] controller in
+                self?.stateController = controller
+            }
         }
 
         // MARK: Dependencies
@@ -47,6 +49,7 @@ extension LaunchesViewController {
         @Dependency(LaunchesFetcher.self) var launchesFetcher
     }
 }
+
 
 // MARK: - Functional
 
@@ -110,9 +113,10 @@ extension LaunchesViewController.ViewModel {
 
     // MARK: Fetching
 
+    /// Fetches new data. Updates state accordingly.
     private func fetchAdditionalData() {
         guard
-            privateState().isLoading == false,
+            state?.isLoading == false,
             canLoadMore
         else { return }
         updateState(to: filteredLaunches.isEmpty ? .loading : .loadingMore)
@@ -121,14 +125,13 @@ extension LaunchesViewController.ViewModel {
 
     private func fetchNextPageLaunches() {
         let nextPage = (launches.count / SpaceXRouter.pageLimit) + 1
-        Task(priority: .userInitiated) {
+        Task(priority: .userInitiated) { @concurrent in
             do throws(APIError) {
                 let launchesRaw: LaunchesRaw = try await launchesFetcher
                     .getLaunchesPage(nextPage, ordering)
-                dataFetched(.success(launchesRaw))
+                await dataFetched(.success(launchesRaw))
             } catch {
-                logger.error("Failed to fetch launches: \(error)")
-                dataFetched(.failure(error))
+                await dataFetched(.failure(error))
             }
         }
     }
@@ -151,6 +154,7 @@ extension LaunchesViewController.ViewModel {
             }
 
         case let .failure(apiError):
+            logger.error("Failed to fetch launches: \(apiError)")
             if filteredLaunches.isEmpty {
                 updateState(to: .networkIssue(apiError.description))
             } else {
@@ -185,11 +189,11 @@ extension LaunchesViewController.ViewModel {
     private func searchTextUpdated(oldValue: String) {
         switch (oldValue.isEmpty, searchText.isEmpty) {
         case (false, true):
-            if privateState.equals(.loadingMore) && filteredLaunches.isEmpty {
+            if state == .loadingMore && filteredLaunches.isEmpty {
                 updateState(to: .loading)
             }
         case (_, false):
-            if privateState.equals(.loaded) && filteredLaunches.isEmpty {
+            if state == .loaded && filteredLaunches.isEmpty {
                 if canLoadMore {
                     fetchAdditionalData()
                 } else {
@@ -201,8 +205,13 @@ extension LaunchesViewController.ViewModel {
     }
 
     private func updateState(to newState: State) {
-        privateState.withLock { $0 = newState }
-        state = newState
+        guard let stateController else {
+            logger.error("State update failed. No state controller attached.")
+            return
+        }
+        stateController {
+            $0 = newState
+        }
     }
 
     private func adjustURLCacheForImages() {
@@ -240,16 +249,19 @@ extension LaunchesViewController.ViewModel {
         fetchAdditionalData()
     }
 
+    func tappedButtonToChangeOrdering(to newOrdering: Ordering) {
+        self.$ordering.withLock { $0 = newOrdering }
+        reloadAllData()
+    }
+
+    func onBackgroundTryAgainButtonTapped() {
+        fetchAdditionalData()
+    }
+
     func rendering(row: Int) {
         let isNearBottom = row >= (filteredLaunches.count - 2)
         if isNearBottom {
             fetchAdditionalData()
         }
-    }
-
-
-    func tappedButtonToChangeOrdering(to newOrdering: Ordering) {
-        self.$ordering.withLock { $0 = newOrdering }
-        reloadAllData()
     }
 }
