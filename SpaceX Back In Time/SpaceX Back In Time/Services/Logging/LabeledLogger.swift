@@ -1,10 +1,9 @@
 import Foundation
-import Dependencies
 import Logging
 
 // MARK: - Class
 
-final class LabeledLoggerDependency<Label> {
+private final class LabeledLoggerImpl<Label> {
     var logger: Logger
 
     init() {
@@ -32,29 +31,17 @@ final class LabeledLoggerDependency<Label> {
     }
 }
 
-// MARK: - Dependency
-
-extension LabeledLoggerDependency: DependencyKey {
-    static var liveValue: LabeledLoggerDependency<Label> {
-        return .init()
-    }
-}
-
-extension LabeledLoggerDependency: TestDependencyKey {
-    static var testValue: LabeledLoggerDependency<Label> {
-        .liveValue
-    }
-}
-
 // MARK: - Property Wrapper
 
 @propertyWrapper
 struct LabeledLogger<LabelType> {
-    @Dependency(LabeledLoggerDependency<LabelType>.self) var labeledLoggerDependency
+    private let labeledLogger: LabeledLoggerImpl<LabelType>
 
     var wrappedValue: Logger {
-        labeledLoggerDependency()
+        labeledLogger.logger
     }
 
-    init(for labelType: LabelType.Type) { }
+    init(for labelType: LabelType.Type) {
+        self.labeledLogger = .init()
+    }
 }
