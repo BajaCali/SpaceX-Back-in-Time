@@ -9,7 +9,7 @@ class LaunchesViewController: UIViewController {
     private let backgroundView = UIView()
     private var detailViewController: UIHostingController<LaunchDetailView>?
 
-    private var viewModel = ViewModel()
+    private var viewModel = ViewModel(launchesFetcher: .live)
 
     private var bindings = Set<AnyCancellable>()
 

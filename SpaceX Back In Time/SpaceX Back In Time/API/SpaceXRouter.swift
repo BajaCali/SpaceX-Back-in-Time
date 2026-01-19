@@ -1,5 +1,4 @@
 import Foundation
-import Dependencies
 import Logging
 
 // MARK: - Constants

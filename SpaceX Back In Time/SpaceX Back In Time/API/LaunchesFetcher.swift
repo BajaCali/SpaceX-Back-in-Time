@@ -1,12 +1,11 @@
 import Foundation
-import Dependencies
 
 struct LaunchesFetcher {
     var getLaunchesPage: (Int, Ordering) async throws(APIError) -> LaunchesRaw
 }
 
-extension LaunchesFetcher: DependencyKey {
-    static var liveValue: LaunchesFetcher {
+extension LaunchesFetcher {
+    static var live: LaunchesFetcher {
         let apiManager = APIManager()
 
         return LaunchesFetcher(getLaunchesPage: { (page, ordering) throws(APIError) in
@@ -14,7 +13,7 @@ extension LaunchesFetcher: DependencyKey {
         })
     }
 
-    static var previewValue: LaunchesFetcher {
+    static var preview: LaunchesFetcher {
         LaunchesFetcher(
             getLaunchesPage: { (_, _) in
                 let decoder = JSONDecoder()

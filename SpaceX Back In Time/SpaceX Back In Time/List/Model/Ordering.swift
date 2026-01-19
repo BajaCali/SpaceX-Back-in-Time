@@ -54,3 +54,27 @@ extension Ordering {
         Ordering(field: .byFlightNumber, direction: .descending)
     }
 }
+
+// MARK: - Ordering + AppStorage
+
+extension Ordering: RawRepresentable {
+    static let attributesDivider = "-"
+    init?(rawValue: String) {
+        let parts = rawValue.split(separator: Self.attributesDivider)
+        guard parts.count == 2,
+              let field = Ordering.Field(rawValue: String(parts[0])),
+              let direction = Ordering.Direction(rawValue: String(parts[1]))
+        else  {
+            return nil
+        }
+
+        self.field = field
+        self.direction = direction
+    }
+
+    var rawValue: String {
+        field.rawValue +
+        Self.attributesDivider +
+        direction.rawValue
+    }
+}

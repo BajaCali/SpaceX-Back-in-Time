@@ -1,9 +1,6 @@
 import Foundation
 import Combine
-import Dependencies
 import Logging
-import Synchronization
-import Sharing
 import SwiftUI
 
 // MARK: - Class
@@ -33,11 +30,14 @@ extension LaunchesViewController {
 
         @Published var detailViewModel: LaunchDetailView.ViewModel?
 
-        @Shared(.appStorage("launchesOrdering")) var ordering: Ordering = .default
+        @AppStorage("launchesOrdering") var ordering: Ordering = .default
 
         @LabeledLogger(for: LaunchesViewController.ViewModel.self) var logger
 
-        init() {
+        init(
+            launchesFetcher: LaunchesFetcher
+        ) {
+            self.launchesFetcher = launchesFetcher
             self.launches = .init()
             self.stateStore = .init(.initial) { [weak self] controller in
                 self?.stateController = controller
@@ -46,7 +46,7 @@ extension LaunchesViewController {
 
         // MARK: Dependencies
 
-        @Dependency(LaunchesFetcher.self) var launchesFetcher
+        let launchesFetcher: LaunchesFetcher
     }
 }
 
@@ -250,7 +250,7 @@ extension LaunchesViewController.ViewModel {
     }
 
     func tappedButtonToChangeOrdering(to newOrdering: Ordering) {
-        self.$ordering.withLock { $0 = newOrdering }
+        self.ordering = newOrdering
         reloadAllData()
     }
 

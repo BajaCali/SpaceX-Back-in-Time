@@ -8,9 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		9028714B2EA23DA10086D0E0 /* License2Chill in Frameworks */ = {isa = PBXBuildFile; productRef = 9028714A2EA23DA10086D0E0 /* License2Chill */; };
-		90831F0D2EA63B8F001ABF95 /* Sharing in Frameworks */ = {isa = PBXBuildFile; productRef = 90831F0C2EA63B8F001ABF95 /* Sharing */; };
-		90BA55E62E9E97AE0086A85D /* Dependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 90BA55E52E9E97AE0086A85D /* Dependencies */; };
-		90BA55E82E9E97AE0086A85D /* DependenciesMacros in Frameworks */ = {isa = PBXBuildFile; productRef = 90BA55E72E9E97AE0086A85D /* DependenciesMacros */; };
 		90C8EC512F0AE9C1005C5E82 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 90C8EC502F0AE9C1005C5E82 /* Logging */; };
 /* End PBXBuildFile section */
 
@@ -55,10 +52,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				90831F0D2EA63B8F001ABF95 /* Sharing in Frameworks */,
-				90BA55E82E9E97AE0086A85D /* DependenciesMacros in Frameworks */,
 				90C8EC512F0AE9C1005C5E82 /* Logging in Frameworks */,
-				90BA55E62E9E97AE0086A85D /* Dependencies in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -127,9 +121,6 @@
 			);
 			name = "SpaceX Back In Time";
 			packageProductDependencies = (
-				90BA55E52E9E97AE0086A85D /* Dependencies */,
-				90BA55E72E9E97AE0086A85D /* DependenciesMacros */,
-				90831F0C2EA63B8F001ABF95 /* Sharing */,
 				90C8EC502F0AE9C1005C5E82 /* Logging */,
 			);
 			productName = "SpaceX Back In Time";
@@ -165,9 +156,7 @@
 			mainGroup = 90BA552A2E9D32D20086A85D;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				90BA55E42E9E97AE0086A85D /* XCRemoteSwiftPackageReference "swift-dependencies" */,
 				902871492EA23DA10086D0E0 /* XCRemoteSwiftPackageReference "license2chill" */,
-				90831F0B2EA63B8F001ABF95 /* XCRemoteSwiftPackageReference "swift-sharing" */,
 				90C8EC4F2F0AE9C1005C5E82 /* XCRemoteSwiftPackageReference "swift-log" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -484,22 +473,6 @@
 				minimumVersion = 2.0.1;
 			};
 		};
-		90831F0B2EA63B8F001ABF95 /* XCRemoteSwiftPackageReference "swift-sharing" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/pointfreeco/swift-sharing.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.7.4;
-			};
-		};
-		90BA55E42E9E97AE0086A85D /* XCRemoteSwiftPackageReference "swift-dependencies" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/pointfreeco/swift-dependencies.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.10.0;
-			};
-		};
 		90C8EC4F2F0AE9C1005C5E82 /* XCRemoteSwiftPackageReference "swift-log" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-log.git";
@@ -515,21 +488,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 902871492EA23DA10086D0E0 /* XCRemoteSwiftPackageReference "license2chill" */;
 			productName = License2Chill;
-		};
-		90831F0C2EA63B8F001ABF95 /* Sharing */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 90831F0B2EA63B8F001ABF95 /* XCRemoteSwiftPackageReference "swift-sharing" */;
-			productName = Sharing;
-		};
-		90BA55E52E9E97AE0086A85D /* Dependencies */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 90BA55E42E9E97AE0086A85D /* XCRemoteSwiftPackageReference "swift-dependencies" */;
-			productName = Dependencies;
-		};
-		90BA55E72E9E97AE0086A85D /* DependenciesMacros */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 90BA55E42E9E97AE0086A85D /* XCRemoteSwiftPackageReference "swift-dependencies" */;
-			productName = DependenciesMacros;
 		};
 		90C8EC502F0AE9C1005C5E82 /* Logging */ = {
 			isa = XCSwiftPackageProductDependency;
