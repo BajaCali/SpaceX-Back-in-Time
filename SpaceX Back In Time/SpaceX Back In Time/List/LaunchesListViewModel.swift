@@ -1,11 +1,12 @@
+import Foundation
 import Combine
-import Dependencies
-import Synchronization
-import Sharing
+import Logging
+import SwiftUI
 
 // MARK: - Class
 
 extension LaunchesViewController {
+    @MainActor
     final class ViewModel {
         @Published var launches: [Launch]
         @Published var searchText: String = "" {
@@ -13,12 +14,11 @@ extension LaunchesViewController {
                 searchTextUpdated(oldValue: oldValue)
             }
         }
-        @Published var state: State = .initial {
-            didSet {
-                @Dependency(EventBroker.self) var eventBroker
-                eventBroker.post(.list(.stateUpdated(state)))
-            }
+        var stateStore: StateStore?
+        var state: State? {
+            stateStore?.state
         }
+        var stateController: StateStore.Controller?
         @Published var errorMessage: String?
 
         var filteredLaunches: [Launch] {
@@ -26,68 +26,97 @@ extension LaunchesViewController {
             return launches.filter { $0.match(by: searchText) }
         }
 
-        private let privateState: Mutex<State> = .init(.initial)
         var totalLaunches: Int?
 
-        @Published var launchInDetail: Launch?
+        @Published var detailViewModel: LaunchDetailView.ViewModel?
 
-        @Shared(.appStorage("launchesOrdering")) var ordering: Ordering = .default
+        @AppStorage("launchesOrdering") var ordering: Ordering = .default
 
-        init() {
+        @LabeledLogger(for: LaunchesViewController.ViewModel.self) var logger
+
+        init(
+            launchesFetcher: LaunchesFetcher
+        ) {
+            self.launchesFetcher = launchesFetcher
             self.launches = .init()
+            self.stateStore = .init(.initial) { [weak self] controller in
+                self?.stateController = controller
+            }
         }
 
         // MARK: Dependencies
 
-        @Dependency(LaunchesFetcher.self) var launchesFetcher
-        @Dependency(EventBroker.self) var eventBroker
+        let launchesFetcher: LaunchesFetcher
     }
 }
+
 
 // MARK: - Functional
 
 extension LaunchesViewController.ViewModel {
 
-    // MARK: Events
+    // MARK: Detail View Callbacks
 
-    private func handleEvent(_  event: Event) {
-        switch event {
-        case .list: return
-
-        case .detail(.nextLaunchButtonTapped):
-            guard
-                let launchInDetail,
-                let currentLaunchIndex = launches.firstIndex(of: launchInDetail),
-                currentLaunchIndex < (launches.endIndex - 1)
-            else {
-                return
-            }
-            sendNewLaunchToDetail(at: launches.index(after: currentLaunchIndex))
+    private func advanceToNextLaunch() {
+        guard
+            let currentDetailLaunch = detailViewModel?.state.launch,
+            let currentLaunchIndex = launches.firstIndex(of: currentDetailLaunch),
+            currentLaunchIndex < (launches.endIndex - 1)
+        else {
             return
-        case .detail(.prevLaunchButtonTapped):
-            guard
-                let launchInDetail,
-                let currentLaunchIndex = launches.firstIndex(of: launchInDetail),
-                currentLaunchIndex >= 1
-            else {
-                return
-            }
-            sendNewLaunchToDetail(at: launches.index(before: currentLaunchIndex))
-            return
-        case .detail(.dismissing):
-            launchInDetail = nil
-        case .detail: return
-
-        case .background(.tryAgainButtonTapped):
-            fetchAdditionalData()
         }
+        // Directly update the state of the existing detailViewModel instance
+        updateDetailViewModel(at: launches.index(after: currentLaunchIndex))
+    }
+
+    private func goBackToPreviousLaunch() {
+        guard
+            let currentDetailLaunch = detailViewModel?.state.launch,
+            let currentLaunchIndex = launches.firstIndex(of: currentDetailLaunch),
+            currentLaunchIndex >= 1
+        else {
+            return
+        }
+        // Directly update the state of the existing detailViewModel instance
+        updateDetailViewModel(at: launches.index(before: currentLaunchIndex))
+    }
+
+    private func dismissDetailView() {
+        detailViewModel = nil
+    }
+
+
+    // MARK: Detail Creation
+
+    func makeDetailViewModel(for launch: Launch) -> LaunchDetailView.ViewModel? {
+        guard let detailState = self.generateDetailState(for: launch) else { return nil }
+
+        let viewModel = LaunchDetailView.ViewModel(
+            launch: detailState.launch,
+            hasNext: detailState.hasNext,
+            hasPrev: detailState.hasPrev,
+            onNextLaunch: { [weak self] in
+                self?.advanceToNextLaunch()
+            },
+            onPrevLaunch: { [weak self] in
+                self?.goBackToPreviousLaunch()
+            },
+            onDismiss: { [weak self] in
+                self?.dismissDetailView()
+            }
+        )
+
+        self.detailViewModel = viewModel
+
+        return viewModel
     }
 
     // MARK: Fetching
 
+    /// Fetches new data. Updates state accordingly.
     private func fetchAdditionalData() {
         guard
-            privateState().isLoading == false,
+            state?.isLoading == false,
             canLoadMore
         else { return }
         updateState(to: filteredLaunches.isEmpty ? .loading : .loadingMore)
@@ -96,38 +125,36 @@ extension LaunchesViewController.ViewModel {
 
     private func fetchNextPageLaunches() {
         let nextPage = (launches.count / SpaceXRouter.pageLimit) + 1
-        Task(priority: .userInitiated) {
-            do {
-                let launches: LaunchesRaw = try await launchesFetcher
+        Task(priority: .userInitiated) { @concurrent in
+            do throws(APIError) {
+                let launchesRaw: LaunchesRaw = try await launchesFetcher
                     .getLaunchesPage(nextPage, ordering)
-                dataFetched(.success(launches))
+                await dataFetched(.success(launchesRaw))
             } catch {
-                guard let apiError = error as? APIError else { return }
-                dataFetched(.failure(apiError))
+                await dataFetched(.failure(error))
             }
         }
     }
 
     private func dataFetched(_ launchesResult: Result<LaunchesRaw, APIError>) {
         switch launchesResult {
-        case let .success(launches):
-            self.launches.append(contentsOf: launches.launches)
-            self.totalLaunches = launches.totalDocs
+        case let .success(rawLaunches):
+            let newLaunches = rawLaunches.launches
+            self.launches.append(contentsOf: newLaunches)
+            self.totalLaunches = rawLaunches.totalDocs
 
             switch (filteredLaunches.isEmpty, canLoadMore) {
-                // success - at least one new launch is filtered in (more via rendering row
             case (false, _):
                 updateState(to: .loaded)
-                // new launches failed to provide search criteria -> dig deeper
             case (true, true):
                 fetchNextPageLaunches()
                 updateState(to: .loading)
-                // cant search more & search failed
             case (true, false):
                 updateState(to: .noSearchResults(searchText))
             }
 
         case let .failure(apiError):
+            logger.error("Failed to fetch launches: \(apiError)")
             if filteredLaunches.isEmpty {
                 updateState(to: .networkIssue(apiError.description))
             } else {
@@ -150,22 +177,23 @@ extension LaunchesViewController.ViewModel {
         return value
     }
 
-    private func sendNewLaunchToDetail(at index: Int) {
+    private func updateDetailViewModel(at index: Int) {
         let newLaunch = launches[index]
         if let newDetailState = generateDetailState(for: newLaunch) {
-            eventBroker.post(.detail(.updateLaunchInDetail(newDetailState)))
-            launchInDetail = newLaunch
+            withAnimation {
+                detailViewModel?.state = newDetailState
+            }
         }
     }
 
     private func searchTextUpdated(oldValue: String) {
         switch (oldValue.isEmpty, searchText.isEmpty) {
         case (false, true):
-            if privateState.equals(.loadingMore) && filteredLaunches.isEmpty {
+            if state == .loadingMore && filteredLaunches.isEmpty {
                 updateState(to: .loading)
             }
         case (_, false):
-            if privateState.equals(.loaded) && filteredLaunches.isEmpty {
+            if state == .loaded && filteredLaunches.isEmpty {
                 if canLoadMore {
                     fetchAdditionalData()
                 } else {
@@ -177,8 +205,18 @@ extension LaunchesViewController.ViewModel {
     }
 
     private func updateState(to newState: State) {
-        privateState.withLock { $0 = newState }
-        state = newState
+        guard let stateController else {
+            logger.error("State update failed. No state controller attached.")
+            return
+        }
+        stateController {
+            $0 = newState
+        }
+    }
+
+    private func adjustURLCacheForImages() {
+        URLCache.shared.memoryCapacity = 50_000_000
+        URLCache.shared.diskCapacity = 500_000_000
     }
 }
 
@@ -200,7 +238,7 @@ extension LaunchesViewController.ViewModel {
 extension LaunchesViewController.ViewModel {
     func onAppear() {
         fetchAdditionalData()
-        eventBroker.listen(.singleUse, self.handleEvent(_:))
+        adjustURLCacheForImages()
     }
 
     func errorOkButtonTapped() {
@@ -211,19 +249,19 @@ extension LaunchesViewController.ViewModel {
         fetchAdditionalData()
     }
 
+    func tappedButtonToChangeOrdering(to newOrdering: Ordering) {
+        self.ordering = newOrdering
+        reloadAllData()
+    }
+
+    func onBackgroundTryAgainButtonTapped() {
+        fetchAdditionalData()
+    }
+
     func rendering(row: Int) {
         let isNearBottom = row >= (filteredLaunches.count - 2)
         if isNearBottom {
             fetchAdditionalData()
         }
-    }
-
-    func detailPushed(with launch: Launch) {
-        self.launchInDetail = launch
-    }
-
-    func tappedButtonToChangeOrdering(to newOrdering: Ordering) {
-        self.$ordering.withLock { $0 = newOrdering }
-        reloadAllData()
     }
 }

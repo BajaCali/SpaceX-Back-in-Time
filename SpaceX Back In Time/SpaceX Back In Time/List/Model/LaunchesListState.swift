@@ -1,5 +1,7 @@
 import Foundation
 
+// MARK: - State
+
 extension LaunchesViewController.ViewModel {
     enum State: Equatable {
         case initial
@@ -20,3 +22,11 @@ extension LaunchesViewController.ViewModel.State {
         }
     }
 }
+
+
+// MARK: - Store
+
+extension LaunchesViewController.ViewModel {
+    typealias StateStore = SingleWriterMultipleReaderStore<State>
+}
+

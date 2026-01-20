@@ -1,15 +1,20 @@
 import UIKit
 import SwiftUI
 import Combine
+import Observation
+import Logging
 
 class LaunchesViewController: UIViewController {
     private let tableView = UITableView()
     private let backgroundView = UIView()
     private var detailViewController: UIHostingController<LaunchDetailView>?
 
-    private var viewModel = ViewModel()
+    private var viewModel = ViewModel(launchesFetcher: .live)
 
     private var bindings = Set<AnyCancellable>()
+
+    @LabeledLogger(for: LaunchesViewController.self) var logger
+
 }
 
 // MARK: - Cells
@@ -44,7 +49,17 @@ extension LaunchesViewController {
     }
 
     private func setupBackground() {
-        let swiftUIView = UIHostingController(rootView: BackgroundView(initialState: viewModel.state))
+        guard let stateStore = viewModel.stateStore else {
+            logger.error("StateStore not upon setting up background")
+            return
+        }
+
+        let swiftUIView = UIHostingController(
+            rootView: BackgroundView(
+                stateStore: stateStore,
+                onTryAgainButtonTap: viewModel.onBackgroundTryAgainButtonTapped
+            )
+        )
 
         backgroundView.addSubview(swiftUIView.view)
 
@@ -117,23 +132,17 @@ extension LaunchesViewController {
 
         viewModel.$errorMessage
             .compactMap(\.self)
+            .receive(on: RunLoop.main)
             .sink { [weak self] errorMessage in
                 self?.showErrorMessageAlert(errorMessage)
             }
             .store(in: &bindings)
 
-        viewModel.$state
+        viewModel.stateStore?.publisher
+            .receive(on: RunLoop.main)
             .sink { [weak self] state in
                 self?.setScrolling(basedOn: state)
                 self?.refreshTableView()
-            }
-            .store(in: &bindings)
-
-        viewModel.$launchInDetail
-            .sink { [weak self] launch in
-                launch.flatMap {
-                    self?.updateDetailsTitle(of: $0)
-                }
             }
             .store(in: &bindings)
     }
@@ -143,15 +152,11 @@ extension LaunchesViewController {
 
 extension LaunchesViewController {
     private func setScrolling(basedOn state: ViewModel.State) {
-        Task {
-            await MainActor.run {
-                switch state {
-                case .initial, .loading, .networkIssue:
-                    tableView.isScrollEnabled = false
-                case .loadingMore, .loadingMoreFailed, .loaded, .noSearchResults:
-                    tableView.isScrollEnabled = true
-                }
-            }
+        switch state {
+        case .initial, .loading, .networkIssue:
+            tableView.isScrollEnabled = false
+        case .loadingMore, .loadingMoreFailed, .loaded, .noSearchResults:
+            tableView.isScrollEnabled = true
         }
     }
 
@@ -162,7 +167,7 @@ extension LaunchesViewController {
 Select a field to which to order.
 Select again to reverse.
 
-Currently sorted \(viewModel.ordering.humanDescription).
+Currently sorted by \(viewModel.ordering.humanDescription).
 """,
             preferredStyle: .actionSheet
         )
@@ -189,65 +194,65 @@ Currently sorted \(viewModel.ordering.humanDescription).
     /// Besides returning the title for action button, function also return ordering to which it should change
     /// upon tapping.
     private func title(for ordering: Ordering) -> (String, Ordering) {
-        var newOrdering = ordering
-        let checkmark = if ordering.field == viewModel.ordering.field {
+        let currentOrdering = viewModel.ordering
+
+        let checkmark = if ordering.field == currentOrdering.field {
             "✓ "
         } else {
             ""
         }
-        if ordering == viewModel.ordering {
-            newOrdering.direction = switch ordering.direction {
-            case .ascending: .descending
-            case .descending: .ascending
-            }
-        }
 
-        let title = checkmark + newOrdering.humanDescription
-        return (title, newOrdering)
+        let direction: Ordering.Direction = {
+            if ordering == currentOrdering {
+                return switch ordering.direction {
+                case .ascending: .descending
+                case .descending: .ascending
+                }
+            }
+            return ordering.direction
+        }()
+
+        let adjustedOrdering = Ordering(field: ordering.field, direction: direction)
+        let title = checkmark + adjustedOrdering.humanDescription
+        return (title, adjustedOrdering)
 
     }
 
     private func showErrorMessageAlert(_ message: String) {
-        Task {
-            await MainActor.run {
-                let confirmAction = UIAlertAction(
-                    title: "Ok",
-                    style: .cancel
-                ) { [weak self] _ in
-                    self?.viewModel.errorOkButtonTapped()
-                }
-
-                let tryAgainAction = UIAlertAction(
-                    title: "Try Again",
-                    style: .default
-                ) { [weak self] _ in
-                    self?.viewModel.errorTryAgainButtonTapped()
-                }
-
-                let alert = UIAlertController(
-                    title: "Network Error",
-                    message: message,
-                    preferredStyle: .alert
-                )
-
-                alert.addAction(confirmAction)
-                alert.addAction(tryAgainAction)
-
-                self.present(alert, animated: true)
-            }
+        let confirmAction = UIAlertAction(
+            title: "Ok",
+            style: .cancel
+        ) { [weak self] _ in
+            self?.viewModel.errorOkButtonTapped()
         }
+
+        let tryAgainAction = UIAlertAction(
+            title: "Try Again",
+            style: .default
+        ) { [weak self] _ in
+            self?.viewModel.errorTryAgainButtonTapped()
+        }
+
+        let alert = UIAlertController(
+            title: "Network Error",
+            message: message,
+            preferredStyle: .alert
+        )
+
+        alert.addAction(confirmAction)
+        alert.addAction(tryAgainAction)
+
+        self.present(alert, animated: true)
     }
 
     private func pushDetail(for launch: Launch) {
-        guard let detailState = viewModel
-            .generateDetailState(for: launch) else {
-            return
-        }
-        let detailController = UIHostingController(rootView: LaunchDetailView(.init(detailState)))
+        guard let detailViewModel = viewModel.makeDetailViewModel(for: launch) else { return }
+
+        let detailController = UIHostingController(rootView: LaunchDetailView(detailViewModel))
         detailController.title = launch.title
+        detailViewModel.viewController = detailController
         navigationController?.pushViewController(detailController, animated: true)
         self.detailViewController = detailController
-        viewModel.detailPushed(with: launch)
     }
 
     private func updateDetailsTitle(of launch: Launch) {
@@ -295,14 +300,9 @@ extension LaunchesViewController: UITableViewDataSource, UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         let selectedLaunch = viewModel.filteredLaunches[indexPath.row]
         pushDetail(for: selectedLaunch)
-        viewModel.detailPushed(with: selectedLaunch)
     }
 
     private func refreshTableView() {
-        Task {
-            await MainActor.run {
-                tableView.reloadData()
-            }
-        }
+        tableView.reloadData()
     }
 }

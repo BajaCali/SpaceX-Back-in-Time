@@ -1,5 +1,4 @@
 import SwiftUI
-import Dependencies
 
 // MARK: - Struct
 
@@ -11,7 +10,7 @@ struct LaunchDetailView {
     }
 }
 
-// MARK: - Derived Properites
+// MARK: - Derived Properties
 
 extension LaunchDetailView {
     var state: ViewModel.State { viewModel.state }
@@ -29,7 +28,6 @@ extension LaunchDetailView: View {
             discussionsSection
         }
         .id(launch.id)
-        .onAppear(perform: viewModel.onAppear)
         .onDisappear(perform: viewModel.onDisappear)
         .toolbar(content: toolbar)
     }
@@ -42,21 +40,24 @@ extension LaunchDetailView {
         ToolbarItem(placement: .topBarTrailing) {
             if state.hasPrev || state.hasNext {
                 HStack {
-                    Button(
-                        "Previous Launch",
-                        systemImage: "arrow.up",
-                        action: viewModel.prevLaunchButtonTapped
-                    )
-                    .transition(.scale)
-                    .font(.caption2)
-                    .optionallyHidden(state.hasPrev == false)
+                    if viewModel.state.hasPrev {
+                        Button(
+                            "Previous Launch",
+                            systemImage: "arrow.up",
+                            action: viewModel.prevLaunchButtonTapped
+                        )
+                        .transition(.scale)
+                        .font(.caption2)
+                    }
 
-                    Button(
-                        "Next Launch",
-                        systemImage: "arrow.down.circle",
-                        action: viewModel.nextLaunchButtonTapped
-                    )
-                    .optionallyHidden(state.hasNext == false)
+                    if viewModel.state.hasNext {
+                        Button(
+                            "Next Launch",
+                            systemImage: "arrow.down.circle",
+                            action: viewModel.nextLaunchButtonTapped
+                        )
+                        .transition(.scale)
+                    }
                 }
                 .tint(.primary)
             }
@@ -149,11 +150,22 @@ extension LaunchDetailView {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     let launch = Launch.withImages
 
     NavigationStack {
-        LaunchDetailView(.init(launch: launch, hasNext: false, hasPrev: true))
-            .navigationTitle(launch.title)
+        LaunchDetailView(
+            .init(
+                launch: launch,
+                hasNext: false,
+                hasPrev: true,
+                onNextLaunch: {},
+                onPrevLaunch: {},
+                onDismiss: {}
+            )
+        )
+        .navigationTitle(launch.title)
     }
 }
+#endif // DEBUG

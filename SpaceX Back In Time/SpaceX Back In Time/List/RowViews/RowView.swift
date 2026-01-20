@@ -54,6 +54,8 @@ struct RowView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     RowView(launch: .withImages)
 }
+#endif // DEBUG

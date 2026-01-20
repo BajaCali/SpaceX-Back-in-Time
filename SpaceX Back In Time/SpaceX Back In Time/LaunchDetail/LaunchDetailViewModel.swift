@@ -1,21 +1,24 @@
 import SwiftUI
-import Dependencies
 
 extension LaunchDetailView {
     @Observable
     final class ViewModel {
-        var state: ViewModel.State
+        var state: State
+        var viewController: UIHostingController<LaunchDetailView>?
 
-        init(_ state: ViewModel.State) {
-            self.state = state
-        }
+        var onNextLaunchRequest: (() -> Void)
+        var onPrevLaunchRequest: (() -> Void)
+        var onDismiss: (() -> Void)
 
-        init(launch: Launch, hasNext: Bool, hasPrev: Bool) {
+        init(launch: Launch, hasNext: Bool, hasPrev: Bool,
+             onNextLaunch: @escaping (() -> Void),
+             onPrevLaunch: @escaping (() -> Void),
+             onDismiss: @escaping (() -> Void)) {
             self.state = .init(launch: launch, hasNext: hasNext, hasPrev: hasPrev)
+            self.onNextLaunchRequest = onNextLaunch
+            self.onPrevLaunchRequest = onPrevLaunch
+            self.onDismiss = onDismiss
         }
-
-        @ObservationIgnored
-        @Dependency(EventBroker.self) var eventBroker
     }
 }
 
@@ -39,33 +42,16 @@ extension LaunchDetailView.ViewModel {
 
 extension LaunchDetailView.ViewModel {
     func nextLaunchButtonTapped() {
-        eventBroker.post(.detail(.nextLaunchButtonTapped))
+        onNextLaunchRequest()
+        self.viewController?.title = self.state.launch.title
     }
 
     func prevLaunchButtonTapped() {
-        eventBroker.post(.detail(.prevLaunchButtonTapped))
+        onPrevLaunchRequest()
+        self.viewController?.title = self.state.launch.title
     }
 
     func onDisappear() {
-        eventBroker.post(.detail(.dismissing))
-    }
-
-    func onAppear() {
-        eventBroker.listen(.reusing(via: "LauchDetail"), handleEvents(_:))
-    }
-}
-
-// MARK: - Functional
-
-extension LaunchDetailView.ViewModel {
-    private func handleEvents(_ event: Event) {
-        switch event {
-        case let .detail(.updateLaunchInDetail(state)):
-            withAnimation {
-                self.state = state
-            }
-            return
-        default: return
-        }
+        onDismiss()
     }
 }
